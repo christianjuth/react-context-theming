@@ -3,30 +3,6 @@ import {
   colorSwatch as colorSwatchType 
 } from './types';
 
-export const defaultTheme: themeType = {
-  colors: {
-    primary: {
-    },
-    accent: '#03DAC6',
-    background: '#FFFFFF',
-    surface: '#FFFFFF',
-    text: '#000000',
-    textMuted: '#CCCCCCC',
-    disabled: '#999999',
-    placeholder: '#CCCCCCC',
-    backdrop: 'rgba(0,0,0,0.2)',
-    divider: '#EEEEEE'
-  },
-  font: {
-    regular: '',
-    medium: '',
-    light: '',
-    thin: ''
-  },
-  dark: false,
-  roundness: 4
-}
-
 export const colors: {
   red: colorSwatchType,
   pink: colorSwatchType,
@@ -341,3 +317,26 @@ export const colors: {
     "900": "#263238"
   }
 };
+
+export const defaultTheme: themeType = {
+  colors: {
+    primary: colors.cyan["500"],
+    accent: colors.pink["500"],
+    background: '#FFFFFF',
+    surface: '#FFFFFF',
+    text: '#000000',
+    textMuted: '#CCCCCCC',
+    disabled: '#999999',
+    placeholder: '#CCCCCCC',
+    backdrop: 'rgba(0,0,0,0.2)',
+    divider: '#EEEEEE'
+  },
+  font: {
+    regular: '',
+    medium: '',
+    light: '',
+    thin: ''
+  },
+  dark: false,
+  roundness: 4
+}

@@ -6,7 +6,8 @@
   "types": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc && npm pack",
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "example": "yarn --cwd example"
   },
   "repository": {
     "type": "git",
@@ -22,15 +23,24 @@
     "ui kit",
     "material design"
   ],
-  "bugs": { 
-    "url" : "https://github.com/christianjuth/react-context-theming/issues"
+  "bugs": {
+    "url": "https://github.com/christianjuth/react-context-theming/issues"
   },
   "peerDependencies": {
-    "react": "*"
+    "react": "*",
+    "react-native": "*"
   },
   "devDependencies": {
     "@types/react": "^16.8.15",
     "@types/react-dom": "^16.8.4",
+    "@types/react-native": "^0.61.12",
     "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@expo/webpack-config": "^0.11.0",
+    "@react-navigation/core": "^5.1.1",
+    "@react-navigation/drawer": "^5.0.2",
+    "fast-memoize": "^2.5.1",
+    "react-dev-utils": "^10.1.0"
   }
 }

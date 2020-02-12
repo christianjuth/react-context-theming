@@ -8,10 +8,24 @@
     "removeComments": true,
     "declaration": true,
     "jsx": "react",
-    "lib": [ "es2015", "dom" ]
+    "lib": [ "es2015" ],
+    "baseUrl": ".",
+    "paths": {
+      "react-context-theming": [
+        "*",
+        "src/index.ts"
+      ],
+      "react-context-theming/native": [
+        "*",
+        "src/native.ts"
+      ]
+    }
   },
   "files": [
     "src/index.ts"
+  ],
+  "include": [
+    "src/*"
   ],
   "exclude": [
     "node_modules"
