@@ -20,5 +20,14 @@
         "src/native.tsx"
       ]
     }
-  }
+  },
+  "files": [
+    "src/index.ts"
+  ],
+  "include": [
+    "src/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

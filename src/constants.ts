@@ -1,28 +1,28 @@
 import { 
-  theme as themeType, 
-  colorSwatch as colorSwatchType 
+  Theme, 
+  ColorSwatch 
 } from './types';
 
 export const colors: {
-  red: colorSwatchType,
-  pink: colorSwatchType,
-  purple: colorSwatchType,
-  deepPurple: colorSwatchType,
-  indigo: colorSwatchType,
-  blue: colorSwatchType,
-  lightBlue: colorSwatchType,
-  cyan: colorSwatchType,
-  teal: colorSwatchType,
-  green: colorSwatchType,
-  lightGreen: colorSwatchType,
-  lime: colorSwatchType,
-  yellow: colorSwatchType,
-  amber: colorSwatchType,
-  orange: colorSwatchType,
-  deepOrange: colorSwatchType,
-  brown: colorSwatchType,
-  grey: colorSwatchType,
-  blueGrey: colorSwatchType
+  red: ColorSwatch,
+  pink: ColorSwatch,
+  purple: ColorSwatch,
+  deepPurple: ColorSwatch,
+  indigo: ColorSwatch,
+  blue: ColorSwatch,
+  lightBlue: ColorSwatch,
+  cyan: ColorSwatch,
+  teal: ColorSwatch,
+  green: ColorSwatch,
+  lightGreen: ColorSwatch,
+  lime: ColorSwatch,
+  yellow: ColorSwatch,
+  amber: ColorSwatch,
+  orange: ColorSwatch,
+  deepOrange: ColorSwatch,
+  brown: ColorSwatch,
+  grey: ColorSwatch,
+  blueGrey: ColorSwatch
 } = {
   "red": {
     "50": "#ffebee",
@@ -318,11 +318,11 @@ export const colors: {
   }
 };
 
-export const defaultTheme: themeType = {
+export const defaultTheme: Theme = {
   colors: {
     primary: colors.cyan["500"],
     accent: colors.pink["500"],
-    background: '#FFFFFF',
+    background: colors.grey[100],
     surface: '#FFFFFF',
     text: '#000000',
     textMuted: '#CCCCCCC',

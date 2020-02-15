@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import Constants from 'expo-constants';
 import { View, Text } from 'react-native';
 import { makeStyleCreator, useStyleCreator } from 'react-context-theming/native';

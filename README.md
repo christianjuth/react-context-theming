@@ -1,4 +1,6 @@
-This is an alpha release! The API of this library will likely change a little. My goal is to design a theme library that is very customizable, and independent of any component libraries.
+This is an alpha release! The API of this library will likely change a little. 
+
+This library supports ReactJS and React Native! My goal is to design a theme library that is very customizable and independent of any component libraries.
 
 ### Basic Usage
 
@@ -53,31 +55,24 @@ function App() {
 export default App;
 ```
 
-### Colors
+### Similar Syntax to React Native StyleSheet
 
 ```jsx
-import { colors } from 'react-context-theming';
+import { useStyleCreator, makeStyleCreator } from 'react-context-theming/lib/native';
 
-let theme = {
-  ...defaultTheme,
-  colors: {
-    ...defaultTheme.colors,
-    // set primary to red material pallet
-    primary: colors.red
-  },
-  dark: true,
-  roundness: 10,
-};
-
-function App() {
+function Divider() {
+  const styles = useStyleCreator(styleCreator);
   return (
-    <ThemeProvider theme={theme}>
-      <StyledText>Hello World!!!</StyledText>
-    </ThemeProvider>
+    <View style={styles.divider}/>
   );
 }
 
-export default App;
+const styleCreator = makeStyleCreator(theme => ({
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.divider
+  }
+}));
 ```
 
 ### TypeScript
@@ -88,21 +83,19 @@ You can override the default types.
 import { 
   Provider as ThemeProvider, 
   useTheme, 
-  themeType,
-  defaultTheme
+  Theme
 } from 'react-context-theming';
 
-interface customThemeType extends themeType {
+interface Theme {
   spacing: number
 };
 
 let theme = {
-  ...defaultTheme,
   spacing: 10
 };
 
 function SpacedText(props) {
-  let { spacing } = useTheme<customThemeType>();
+  let { spacing } = useTheme<Theme>();
   return (
     <div>
       <h1>Item 1</h1>
@@ -114,7 +107,7 @@ function SpacedText(props) {
 
 function App() {
   return (
-    <ThemeProvider<customThemeType> theme={theme}>
+    <ThemeProvider<Theme> theme={theme}>
       <SpacedText/>
     </ThemeProvider>
   );

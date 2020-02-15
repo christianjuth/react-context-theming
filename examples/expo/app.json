@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Blank Template (TypeScript)",
+    "name": "React Context Theming",
     "slug": "react-context-theming",
     "privacy": "public",
     "sdkVersion": "36.0.0",

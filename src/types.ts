@@ -1,4 +1,4 @@
-export type colorSwatch = {
+export type ColorSwatch = {
   50: string,
   100: string,
   200: string,
@@ -15,7 +15,7 @@ export type colorSwatch = {
   a700?: string
 }
 
-export type theme = {
+export type Theme = {
   colors: {
     primary: string,
     accent: string,
@@ -28,12 +28,12 @@ export type theme = {
     backdrop: string,
     divider: string
   },
-  font: {
+  font?: {
     regular: string,
     medium: string,
     light: string,
     thin: string
   },
-  dark: boolean,
-  roundness: number
+  dark?: boolean,
+  roundness?: number
 };
