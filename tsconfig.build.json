@@ -10,6 +10,7 @@
     "jsx": "react",
     "lib": [ "es2015" ],
     "baseUrl": ".",
+    "strict": true,
     "paths": {
       "react-context-theming": [
         "*",
@@ -18,6 +19,10 @@
       "react-context-theming/native": [
         "*",
         "src/native.tsx"
+      ],
+      "react-context-theming/web": [
+        "*",
+        "src/web.tsx"
       ]
     }
   },

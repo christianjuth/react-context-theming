@@ -1,12 +1,14 @@
 {
   "name": "react-context-theming",
-  "version": "1.0.0-alpha.05",
+  "version": "1.0.0-alpha.06",
   "description": "Customizable theme library written in TypeScript",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
+    "dev": "tsc --project tsconfig.build.json --watch",
     "build": "(rm -r lib || true) && tsc --project tsconfig.build.json",
-    "example": "yarn --cwd examples/expo",
+    "example:expo": "yarn --cwd examples/expo",
+    "example:cra": "yarn --cwd examples/cra",
     "release": "yarn build && cd lib",
     "prepublish": "yarn build"
   },

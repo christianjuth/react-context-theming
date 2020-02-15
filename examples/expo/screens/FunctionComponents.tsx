@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Header } from '../navigation';
 import { ScrollView, View, Button, TextInput, Slider, Switch, Text, Image } from 'react-native';
 import { useStyleCreator, makeStyleCreator } from 'react-context-theming/native';
-import { useTheme, Provider as ThemeProvider, defaultTheme } from 'react-context-theming';
+import { useTheme, Provider as ThemeProvider, defaultTheme} from 'react-context-theming';
 
 function FunctionComponents() {
   const {colors, dark} = useTheme();
