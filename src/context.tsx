@@ -23,10 +23,14 @@ export function useTheme<T = Theme>(): T {
 }
 
 export function withTheme(Component: any): any {
-  return class WrappedComponent extends Component<{}, null> {
+  return class WrappedComponent extends React.Component<{}, null> {
     static contextType = Context;
     render() {
       return <Component {...this.props} theme={this.context}/>;
     }
   };
 }
+
+export interface WithTheme {
+  theme?: Theme
+};
