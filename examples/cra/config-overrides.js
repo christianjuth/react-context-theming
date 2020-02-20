@@ -5,6 +5,7 @@ const path = require('path');
 module.exports = override(
   removeModuleScopePlugin(),
   addWebpackAlias({
-    ["react-context-theming"]: path.resolve(__dirname, `../../lib/`)
+    ["react-context-theming"]: path.resolve(__dirname, '../../lib/'),
+    ["react"]: path.resolve(__dirname, 'node_modules/react')
   })
 );

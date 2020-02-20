@@ -15,7 +15,7 @@ module.exports = {
     extraNodeModules: new Proxy(myNodeModules, {
       get: (target, name) =>
         name in target ? target[name] : path.join(process.cwd(), `node_modules/${name}`),
-    }),
+    })
   },
 
   projectRoot: __dirname,
@@ -25,7 +25,7 @@ module.exports = {
   // // This also lets us import modules from monorepo root
   watchFolders: [
     path.resolve(root, 'src'),
-    path.resolve(root, 'node_modules')
+    // path.resolve(root, 'node_modules')
   ],
 
   transformer: {
