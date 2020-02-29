@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 import { View } from 'react-native';
-import { Provider, defaultTheme, Theme } from '../index';
+import { Provider, defaultTheme } from '../index';
 import { makeStyleCreator, useStyleCreator, withStyleCreator, WithStyleCreator } from '../native';
 
 describe('native', () => {

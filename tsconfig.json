@@ -14,7 +14,7 @@
     "paths": {
       "react-context-theming": [
         "*",
-        "src/index.ts"
+        "src/index.tsx"
       ],
       "react-context-theming/native": [
         "*",

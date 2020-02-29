@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { TextStyle, ViewStyle, ImageStyle, StyleSheet, StyleProp } from 'react-native';
-import { useTheme, Context } from './context';
-import { Theme } from './types';
+import { useTheme, Context, Theme } from './index';
 
 export interface StyleSheet {
   [key: string]: StyleProp<TextStyle> | StyleProp<ViewStyle> | StyleProp<ImageStyle>;
@@ -12,8 +11,8 @@ export interface GeneratedStyles {
 
 export type StyleCreatorFunction<T> = (theme: T, ...extraData: any[]) => StyleSheet;
 
-export interface WithStyleCreator {
-  theme: Theme,
+export interface WithStyleCreator<T = Theme> {
+  theme: T,
   styles: GeneratedStyles
 };
 
@@ -21,7 +20,7 @@ export interface WithStyleCreator {
 
 export function makeStyleCreator<T = Theme>(
   fn: StyleCreatorFunction<T>
-): any {
+): StyleCreatorFunction<T> {
   return (props: any, ...extraData: any[]) => (
     StyleSheet.create(fn(props, ...extraData) as any)
   );

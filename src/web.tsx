@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useTheme, Context } from './context';
-import { Theme } from './types';
+import { useTheme, Context, Theme } from './index';
 
 export interface StyleSheet {
   [key: string]: React.CSSProperties;
