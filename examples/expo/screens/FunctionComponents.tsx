@@ -8,7 +8,6 @@ function FunctionComponents() {
   const {colors, dark} = useTheme();
   const styles = useStyleCreator(styleCreator);
   const [switchValue, setSwitchValue] = React.useState(false);
-
   return (
     <>
       <Header/>
@@ -16,7 +15,6 @@ function FunctionComponents() {
         style={styles.container}
         indicatorStyle={dark ? 'white' : 'black'}
       >
-        
         <View style={styles.card}>
 
           <Text style={styles.text}>
@@ -73,23 +71,19 @@ const styleCreator = makeStyleCreator((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background
   },
-
   card: {
     backgroundColor: theme.colors.surface,
     padding: 30,
     marginTop: 10
   },
-
   spacer: {
     height: 20
   },
-
   image: {
     height: 100,
     width: 100,
     alignSelf: 'center'
   },
-
   input: {
     borderWidth: 1,
     borderColor: theme.colors.accent,
@@ -97,16 +91,13 @@ const styleCreator = makeStyleCreator((theme) => ({
     borderRadius: theme.roundness,
     color: theme.colors.text
   },
-
   divider: {
     height: 1,
     backgroundColor: theme.colors.divider
   },
-  
   switch: {
     alignSelf: 'center'
   },
-
   text: {
     fontSize: 22,
     fontWeight: '600',

@@ -1,38 +1,42 @@
 import * as React from 'react';
-import { TextStyle, ViewStyle, ImageStyle, StyleSheet, StyleProp } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useTheme, Context, Theme } from './index';
 
-export interface StyleSheet {
-  [key: string]: StyleProp<TextStyle> | StyleProp<ViewStyle> | StyleProp<ImageStyle>;
-}
-export interface GeneratedStyles {
-  [key: string]: StyleProp<any>;
-}
-
-export type StyleCreatorFunction<T> = (theme: T, ...extraData: any[]) => StyleSheet;
+export type StyleCreatorFunction<T, S> = (theme: T, ...extraData: any[]) => StyleSheet.NamedStyles<S>;
+export type GenerateStylesFunction<T, S> = (theme: T, ...extraData: any[]) => S;
 
 export interface WithStyleCreator<T = Theme> {
   theme: T,
-  styles: GeneratedStyles
+  styles: any
 };
 
-
-
-export function makeStyleCreator<T = Theme>(
-  fn: StyleCreatorFunction<T>
-): StyleCreatorFunction<T> {
+export function makeStyleCreator<
+  T = Theme, 
+  S extends StyleSheet.NamedStyles<S> | StyleSheet.NamedStyles<any> = never
+>(
+  fn: StyleCreatorFunction<T, S> | GenerateStylesFunction<T, S>
+): GenerateStylesFunction<T, S> {
   return (props: any, ...extraData: any[]) => (
-    StyleSheet.create(fn(props, ...extraData) as any)
+    StyleSheet.create(fn(props, ...extraData))
   );
 }
 
-export function useStyleCreator<T = Theme>(styleFn: StyleCreatorFunction<T>, ...extraData: any[]): GeneratedStyles {
+export function useStyleCreator<
+  T = Theme, 
+  S = never
+>(
+  styleFn: GenerateStylesFunction<T, S>,
+  ...extraData: any[]
+) {
   return styleFn(useTheme<T>(), ...extraData);
 };
 
-export function withStyleCreator<T = Theme>(
+export function withStyleCreator<
+  T = Theme,
+  S = never
+>(
   Component: any, 
-  styleFn: StyleCreatorFunction<T>, 
+  styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ): any {
   return class WrappedComponent extends React.Component<{}, null> {
@@ -41,7 +45,7 @@ export function withStyleCreator<T = Theme>(
       return (
         <Component 
           {...this.props} 
-          styles={styleFn(this.context, extraData)}
+          styles={styleFn(this.context, ...extraData)}
           theme={this.context}
         />
       );
