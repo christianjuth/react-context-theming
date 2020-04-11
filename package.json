@@ -12,7 +12,7 @@
     "example:cra": "yarn --cwd examples/cra",
     "prepublish": "yarn build",
     "test": "jest",
-    "typescript": "tsc --project tsconfig.build.json --noEmit"
+    "typescript": "tsc --project tsconfig.json --noEmit"
   },
   "husky": {
     "hooks": {
@@ -63,7 +63,7 @@
     "react": "^16.12.0",
     "react-test-renderer": "^16.12.0",
     "typedoc": "^0.16.10",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.0-dev.20200410"
   },
   "dependencies": {
     "react-native": "^0.61.5"

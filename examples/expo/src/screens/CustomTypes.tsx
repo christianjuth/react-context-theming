@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { Header } from '../navigation';
-import { ScrollView, View, Button, TextInput, Text, Slider, Switch, Image } from 'react-native';
+import { ScrollView, View, Button, TextInput, Text, Slider, Switch, Image, StyleSheet } from 'react-native';
 import * as Theming from 'react-context-theming';
-import { StyleCreatorFunction } from 'react-context-theming/native';
-import * as NativeTheming from 'react-context-theming/native';
+import * as NativeThemeing from 'react-context-theming/native';
 
 type Theme =  {
   colors: {
@@ -32,12 +31,25 @@ const theme: Theme = {
  * every file in your project
  */
 const useTheme = (): Theme => Theming.useTheme<Theme>();
-const makeStyleCreator = (fn: StyleCreatorFunction<Theme>) => (
-  NativeTheming.makeStyleCreator<Theme>(fn)
-);
-const useStyleCreator = (fn: StyleCreatorFunction<Theme>) => (
-  NativeTheming.useStyleCreator<Theme>(fn)
-);
+function makeStyleCreator<
+  T = Theme, 
+  S extends StyleSheet.NamedStyles<S> | StyleSheet.NamedStyles<any> = never
+>(
+  styleFn: NativeThemeing.StyleCreatorFunction<T, S> | NativeThemeing.GenerateStylesFunction<T, S>
+): NativeThemeing.GenerateStylesFunction<T, S> {
+  return NativeThemeing.makeStyleCreator<T, S>(styleFn);
+}
+
+function useStyleCreator<
+  T = Theme, 
+  S = never
+>(
+  styleFn: NativeThemeing.GenerateStylesFunction<T, S>,
+  ...extraData: any[]
+) {
+  return NativeThemeing.useStyleCreator<T, S>(styleFn, ...extraData)
+};
+
 
 function TypeScript() {
   const {colors} = useTheme();

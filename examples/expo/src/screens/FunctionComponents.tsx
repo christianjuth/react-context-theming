@@ -8,6 +8,8 @@ function FunctionComponents() {
   const {colors, dark} = useTheme();
   const styles = useStyleCreator(styleCreator);
   const [switchValue, setSwitchValue] = React.useState(false);
+  // @ts-expect-error
+  styles.throwError;
   return (
     <>
       <Header/>

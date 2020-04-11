@@ -25,5 +25,14 @@
         "src/web.tsx"
       ]
     }
-  }
+  },
+  "files": [
+    "src/index.tsx"
+  ],
+  "include": [
+    "src/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
