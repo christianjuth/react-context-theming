@@ -9,7 +9,7 @@ function FunctionComponents() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.text}>Function Components</h1>
+      <h1 style={styles.text}>FunctionComponents</h1>
 
       <Button color={colors.accent}>Button</Button>
 

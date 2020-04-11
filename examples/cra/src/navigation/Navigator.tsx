@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Sidebar from './Sidebar';
-import { FunctionComponent } from '../pages';
+import * as Screens from '../pages';
 
 export default function App() {
   return (
@@ -12,15 +12,21 @@ export default function App() {
           flexDirection: 'row'
         }}
       >
-
         <Sidebar/>
-
         <Switch>
-          <Route path="/">
-            <FunctionComponent/>
+          <Route exact path="/">
+            <Screens.FunctionComponent/>
+          </Route>
+          <Route exact path="/class-component">
+            <Screens.ClassComponent/>
+          </Route>
+          <Route exact path="/custom-theme">
+            <Screens.CustomTheme/>
+          </Route>
+          <Route exact path="/typescript">
+            <Screens.CustomTypes/>
           </Route>
         </Switch>
-
       </div>
     </Router>
   );
