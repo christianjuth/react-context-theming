@@ -2,11 +2,22 @@
 
 This is an alpha release! The API of this library will likely change a little. 
 
-This library supports ReactJS and React Native! My goal is to design a theme library that is very customizable and independent of any component libraries. **WEB API WILL MOST LIKELY CHANGE**. I would like to have it render styles to class names like `styled-components` and `material-ui`.
+The purpose of this library is to provide one API that allows you to dynamically theme both React Native Apps (including RN Web) and React.js. I hope that this will make it easier to move between RN and React.js project or even share code between projects. The library is inspired by what I've seen from React Native Paper and Material UI, but decoupled from a component library. **WEB API WILL MOST LIKELY CHANGE**. I would like to have it render styles to class names like `styled-components` and `material-ui`.
 
-### Custom ThemeThis is an alpha release! The API of this library will likely change a little. 
+## Checklist to Make this library production ready
 
-This library supports ReactJS and React Native! My goal is to design a theme library that is very customizable and independent of any component libraries. **WEB API WILL MOST LIKELY CHANGE**. I would like to have it render styles to class names similar to `styled-components` and `material-ui`.
+- [ ] Web Support
+  - [ ] Next.js SSR styles
+  - [ ] Test performance (check for white flash on page load)
+- [ ] React Native Support
+  - [x] RN StyleSheet like syntax
+  - [x] Use dynamic theming to support dark mode
+    - [x] Ios
+    - [x] Android
+    - [x] RN Web (https://awesome-stonebraker-f3e667.netlify.app/)
+- [ ] Docs
+  - [ ] Better TypeScript examples 
+  - [ ] Add Next.js example app to repo
 
 ## Examples
 
