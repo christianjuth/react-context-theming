@@ -8,7 +8,7 @@
     "removeComments": true,
     "declaration": true,
     "jsx": "react",
-    "lib": [ "ES5", "DOM" ],
+    "lib": [ "ESNext", "DOM" ],
     "baseUrl": ".",
     "strict": true,
     "paths": {

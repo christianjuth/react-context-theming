@@ -108,7 +108,7 @@ function reactStylesToCSS<A>(styles: A): {
       })
       selectorStyles[computed.prop] = computed.value;
     });
-    output[key] = JSON.stringify(selectorStyles).replace(/"/g, "").replace(/,/g, ";");
+    output[key] = '{'+Object.entries(selectorStyles).map(([k, v]) => `${k}:${v}`).join(';')+'}'
   });
   return output;
 }

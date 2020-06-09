@@ -16,6 +16,7 @@ const styleCreator = makeStyleCreator(theme => ({
   box: {
     height: 100,
     width: 100,
-    backgroundColor: '#f00'
+    backgroundColor: '#f00',
+    borderBottomColor: 'rgba(0,0,0,0.1)'
   }
 }))
