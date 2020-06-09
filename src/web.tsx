@@ -78,6 +78,13 @@ if(typeof document !== 'undefined') {
   document.head.appendChild(style);
 }
 
+export const ref: {
+  styles: any,
+  updateStyleSheet: () => any
+} = {
+  styles: {},
+  updateStyleSheet: () => {}
+}
 
 let registeredStyles: any = {};
 function registerStyle(selector: string, css: string ) {
@@ -88,10 +95,33 @@ function registerStyle(selector: string, css: string ) {
     else if(style?.sheet?.addRule) {
       style?.sheet.addRule(selector, css, 0);
     }
+    ref.styles[selector] = css;
     registeredStyles[selector] = true;
+    ref.updateStyleSheet();
   }
 }
 
+
+export function getStyles() {
+  return Object.entries(ref.styles).map(([k, v]) => `${k} ${v}`).join(' ');
+}
+
+export function StyleSheet() {
+  const [styles, setStyles] = React.useState(getStyles());
+  React.useEffect(() => {
+    ref.updateStyleSheet = () => {
+      setStyles(getStyles());
+    };
+    return () => {
+      ref.updateStyleSheet = () => {}
+    }
+  }, []);
+  return (
+    <style>
+      {styles}
+    </style>
+  );
+}
 
 function reactStylesToCSS<A>(styles: A): {
   [P in keyof A]: string;
