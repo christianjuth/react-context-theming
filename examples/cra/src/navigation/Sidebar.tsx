@@ -9,6 +9,7 @@ function Sidebar() {
       <Link to="/class-component" style={styles.link}>Class Components</Link>
       <Link to="/custom-theme" style={styles.link}>Custom Theme</Link>
       <Link to="/typescript" style={styles.link}>TypeScript</Link>
+      <Link to="/class-names" style={styles.link}>Class Names</Link>
     </div>
   );
 }

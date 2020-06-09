@@ -8,7 +8,7 @@
     "removeComments": true,
     "declaration": true,
     "jsx": "react",
-    "lib": [ "es2015" ],
+    "lib": [ "ES5", "DOM" ],
     "baseUrl": ".",
     "strict": true,
     "paths": {
@@ -24,7 +24,8 @@
         "*",
         "src/web.tsx"
       ]
-    }
+    },
+    "skipLibCheck": true
   },
   "files": [
     "src/index.tsx"

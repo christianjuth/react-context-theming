@@ -26,6 +26,9 @@ export default function App() {
           <Route exact path="/typescript">
             <Screens.CustomTypes/>
           </Route>
+          <Route exact path="/class-names">
+            <Screens.ClassNames/>
+          </Route>
         </Switch>
       </div>
     </Router>
