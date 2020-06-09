@@ -3,7 +3,6 @@ import { useTheme, Context, Theme } from './index';
 import { generateComponentId, camelCaseToHyphenated, ObjectKeys } from './utils';
 // @ts-ignore
 import * as cssVendor from 'css-vendor';
-console.log(cssVendor.prefix);
 
 export type NamedStyles<T> = { 
   [P in keyof T]: React.CSSProperties
