@@ -152,7 +152,7 @@ export function addUnitToPeropertyIfNeeded(property: string, value: number) {
   return value + '';
 }
 
-export function reactStylesToCSS<A>(styles: A): {
+export function reactStylesToCSS<A, B>(styles: A): {
   [P in keyof A]: string;
 } {
   let output: any = {};
@@ -181,11 +181,11 @@ export function generateCSS<A>(styles: A): {
   let classNames: any = {};
   ObjectKeys(styleSheet).map(key => {
     const css = styleSheet[key];
+    const [,pseudo] = splitClassFromPseudo(key+'');
     let className = generateComponentId(css);
     classNames[key] = className;
-    registerStyle('.'+className, css);
+    registerStyle('.'+className+pseudo, css);
   });
-
   return classNames;
 }
 
@@ -194,4 +194,9 @@ export function prefix({prop, value}: {prop: string, value: string}) {
     prop: cssVendor.supportedProperty(prop),
     value: cssVendor.supportedValue(prop, value)
   };
+}
+
+export function splitClassFromPseudo(selector: string) {
+  const split = selector.split(':');
+  return [split[0], split[1] ? ':'+split[1] : ''];
 }
