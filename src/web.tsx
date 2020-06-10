@@ -123,7 +123,36 @@ export function StyleSheet() {
   );
 }
 
-function reactStylesToCSS<A>(styles: A): {
+export function addUnitToPeropertyIfNeeded(property: string, value: number) {
+  const match = [
+    'width',
+    'height',
+    'padding',
+    'margin',
+    'radius',
+    'spacing',
+    'offset',
+    'outset',
+    'gap'
+  ];
+  for(let i = 0; i < match.length; i++) {
+    if(property.toLowerCase().indexOf(match[i]) > -1) {
+      return value + 'px';
+    }
+  }
+  const exactMatch = [
+    'top',
+    'right',
+    'bottom',
+    'left'
+  ];
+  if(exactMatch.indexOf(property) > -1) {
+    return value + 'px';
+  }
+  return value + '';
+}
+
+export function reactStylesToCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
   let output: any = {};
@@ -134,7 +163,7 @@ function reactStylesToCSS<A>(styles: A): {
       const computed = prefix({
         prop: camelCaseToHyphenated(prop+''),
         // number values should default to px unit
-        value: typeof val === 'number' ? val+'px' : val+''
+        value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(camelCaseToHyphenated(prop+''), val) : val+''
       })
       selectorStyles[computed.prop] = computed.value;
     });
@@ -144,7 +173,7 @@ function reactStylesToCSS<A>(styles: A): {
 }
 
 
-function generateCSS<A>(styles: A): {
+export function generateCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
   const styleSheet = reactStylesToCSS(styles);
@@ -160,7 +189,7 @@ function generateCSS<A>(styles: A): {
   return classNames;
 }
 
-function prefix({prop, value}: {prop: string, value: string}) {
+export function prefix({prop, value}: {prop: string, value: string}) {
   return {
     prop: cssVendor.supportedProperty(prop),
     value: cssVendor.supportedValue(prop, value)
