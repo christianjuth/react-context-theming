@@ -16,7 +16,10 @@ export default function Home() {
       <Link
         href='/page2'
       >
-        <a>Page2</a>
+        <a className={[
+          classes.link,
+          classes["link:hover"]
+        ].join(' ')}>Page2</a>
       </Link>
     </ThemeProvider>
   )
@@ -33,5 +36,15 @@ const styleCreator = makeStyleCreator(theme => ({
   },
   'box:hover': {
     backgroundColor: '#0f0',
-  }
+  },
+  link: {
+    textDecoration: 'none',
+    color: theme.colors.textMuted,
+  },
+  'link:hover': {
+    color: theme.colors.accent
+  },
+  linkActive: {
+    color: theme.colors.accent
+  },
 }))

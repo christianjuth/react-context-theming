@@ -6,8 +6,8 @@ The purpose of this library is to provide one API that allows you to dynamically
 
 ## Checklist to make this library production ready
 
-- [ ] Web Support
-  - [ ] Next.js SSR styles
+- [x] Web Support
+  - [x] Next.js SSR styles
   - [ ] Test performance (check for white flash on page load)
 - [ ] React Native Support
   - [x] RN StyleSheet like syntax
@@ -17,11 +17,11 @@ The purpose of this library is to provide one API that allows you to dynamically
     - [x] RN Web (https://awesome-stonebraker-f3e667.netlify.app/)
 - [ ] Docs
   - [ ] Better TypeScript examples 
-  - [ ] Add Next.js example app to repo
+  - [x] Add Next.js example app to repo
 
 ## Examples
 
-#### Custom Theme
+### Custom Theme
 
 ```jsx
 import { Provider as ThemeProvider, defaultTheme } from 'react-context-theming';
@@ -50,7 +50,7 @@ function App() {
 export default App;
 ```
 
-#### Similar Syntax to React Native StyleSheet
+### Similar Syntax to React Native StyleSheet
 
 ```jsx
 import { useStyleCreator, makeStyleCreator } from 'react-context-theming/lib/native';
@@ -70,7 +70,7 @@ const styleCreator = makeStyleCreator(theme => ({
 }));
 ```
 
-#### TypeScript
+### TypeScript
 
 You can override the default types.
 

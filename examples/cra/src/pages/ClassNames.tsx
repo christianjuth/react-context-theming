@@ -9,6 +9,8 @@ function ClassNames() {
       <h1 className={classes.text}>Class Names</h1>
       <div className={classes.square}/>
       <div className={classes.circle}/>
+
+      <div className={[classes.square, classes.red, classes.blue].join(' ')}/>
     </div>
   );
 }
@@ -27,7 +29,7 @@ const styleCreator = makeStyleCreator(theme => ({
   square: {
     height: 150,
     width: 150,
-    backgroundColor: '#f00',
+    // backgroundColor: '#f00',
     marginBottom: 20
   },
   circle: {
@@ -35,6 +37,12 @@ const styleCreator = makeStyleCreator(theme => ({
     width: 150,
     backgroundColor: '#0f0',
     borderRadius: '100%'
+  },
+  blue: {
+    backgroundColor: 'blue'
+  },
+  red: {
+    backgroundColor: 'red'
   }
 }));
 

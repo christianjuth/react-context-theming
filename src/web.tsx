@@ -156,7 +156,10 @@ export function reactStylesToCSS<A, B>(styles: A): {
   [P in keyof A]: string;
 } {
   let output: any = {};
-  ObjectKeys(styles).forEach(key => {
+  // Reverse the styles so styles
+  // defiend later will override
+  // styles defined eariler (match CSS)
+  ObjectKeys(styles).reverse().forEach(key => {
     let selectorStyles: any = {};
     ObjectKeys(styles[key]).forEach(prop => {
       const val = styles[key][prop];
@@ -182,7 +185,7 @@ export function generateCSS<A>(styles: A): {
   ObjectKeys(styleSheet).map(key => {
     const css = styleSheet[key];
     const [,pseudo] = splitClassFromPseudo(key+'');
-    let className = generateComponentId(css);
+    let className = generateComponentId(pseudo+css);
     classNames[key] = className;
     registerStyle('.'+className+pseudo, css);
   });

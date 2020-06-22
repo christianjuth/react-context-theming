@@ -47,26 +47,26 @@
     "react-native": "*"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/preset-env": "^7.8.4",
-    "@babel/preset-react": "^7.8.3",
-    "@babel/preset-typescript": "^7.8.3",
-    "@commitlint/config-conventional": "^8.3.4",
-    "@types/jest": "^25.2.1",
-    "@types/react": "^16.9.34",
-    "@types/react-dom": "^16.9.6",
-    "@types/react-native": "^0.62.2",
+    "@babel/plugin-proposal-class-properties": "7.10.1",
+    "@babel/preset-env": "7.10.3",
+    "@babel/preset-react": "7.10.1",
+    "@babel/preset-typescript": "7.10.1",
+    "@commitlint/config-conventional": "9.0.1",
+    "@types/jest": "26.0.0",
+    "@types/react": "16.9.38",
+    "@types/react-dom": "16.9.8",
+    "@types/react-native": "0.62.13",
     "@types/react-test-renderer": "^16.9.2",
-    "commitlint": "^8.3.5",
+    "commitlint": "9.0.1",
     "husky": "^4.2.5",
-    "jest": "^25.3.0",
+    "jest": "26.0.1",
     "react": "^16.12.0",
     "react-test-renderer": "^16.12.0",
-    "typedoc": "^0.16.10",
-    "typescript": "^3.9.0-dev.20200410"
+    "typedoc": "0.17.7",
+    "typescript": "3.9.5"
   },
   "dependencies": {
     "css-vendor": "^2.0.8",
-    "react-native": "^0.61.5"
+    "react-native": "0.62.2"
   }
 }
