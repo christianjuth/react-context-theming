@@ -4,8 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev",
-    "start": "next start",
+    "start": "next",
     "build": "next build"
   },
   "dependencies": {

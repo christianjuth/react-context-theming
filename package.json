@@ -10,6 +10,7 @@
     "docs": "yarn typedoc --out docs/ src/ --mode modules",
     "example:expo": "yarn --cwd examples/expo",
     "example:cra": "yarn --cwd examples/cra",
+    "example:next": "yarn --cwd examples/next",
     "prepublish": "yarn build",
     "test": "jest",
     "typescript": "tsc --project tsconfig.json --noEmit"

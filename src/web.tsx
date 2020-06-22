@@ -86,18 +86,20 @@ export const ref: {
   updateStyleSheet: () => {}
 }
 
+let priority = 0;
 let registeredStyles: any = {};
 function registerStyle(selector: string, css: string ) {
   if(!registeredStyles[selector]) {
     if(style?.sheet?.insertRule) {
-      style?.sheet.insertRule(`${selector} ${css}`, 0);
+      style?.sheet.insertRule(`${selector} ${css}`, priority);
     }
     else if(style?.sheet?.addRule) {
-      style?.sheet.addRule(selector, css, 0);
+      style?.sheet.addRule(selector, css, priority);
     }
     ref.styles[selector] = css;
     registeredStyles[selector] = true;
     ref.updateStyleSheet();
+    priority++;
   }
 }
 
@@ -156,10 +158,7 @@ export function reactStylesToCSS<A, B>(styles: A): {
   [P in keyof A]: string;
 } {
   let output: any = {};
-  // Reverse the styles so styles
-  // defiend later will override
-  // styles defined eariler (match CSS)
-  ObjectKeys(styles).reverse().forEach(key => {
+  ObjectKeys(styles).forEach(key => {
     let selectorStyles: any = {};
     ObjectKeys(styles[key]).forEach(prop => {
       const val = styles[key][prop];
