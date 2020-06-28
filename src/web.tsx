@@ -238,19 +238,19 @@ function prefix({ prop, value }: { prop: string, value: string }): {
   return Object.keys(computed).map(key => {
     if(typeof computed[key] === 'string') {
       return [
-        { prop, value },
         {
           prop: key,
           value: computed[key]
-        }
+        },
+        { prop, value }
       ];
     } else {
       return [
-        { prop, value },
         ...computed[key].map((val: string) => ({
           prop: key,
           value: val
-        })).reverse()
+        })),
+        { prop, value }
       ]
     }
   })[0];
