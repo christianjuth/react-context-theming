@@ -49,7 +49,7 @@ const styleCreator = makeStyleCreator(theme => ({
     color: theme.colors.accent
   },
   text: {
-    color: '#f00',
+    color: '#F0F',
     display: 'flex',
     fontSmoothing: 'auto',
   }

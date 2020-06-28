@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { generateComponentId, camelCaseToHyphenated, ObjectKeys, useId } from './utils';
+import { generateComponentId, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, useId } from './utils';
 // @ts-ignore
 import postcss from 'postcss-js';
 const prefixer = postcss.sync([ 
@@ -54,7 +54,7 @@ export function useStyleCreatorClassNames<
   styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ) {
-  return useCSS(useStyleCreator(styleFn));
+  return useCSS(useStyleCreator(styleFn, ...extraData));
 }
 
 export function withStyleCreator<
@@ -197,7 +197,7 @@ export function reactStylesToCSS<A, B>(styles: A): {
 
       selectorStyles = selectorStyles.concat(computed);
     });
-    output[key] = '{'+selectorStyles.map(style => `${camelCaseToHyphenated(style.prop)}:${camelCaseToHyphenated(style.value)}`).join(';')+'}';
+    output[key] = '{'+selectorStyles.map(style => `${camelCaseToHyphenated(style.prop)}:${cssNormalizeValue(style.value)}`).join(';')+'}';
   });
   return output;
 }

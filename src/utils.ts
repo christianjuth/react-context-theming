@@ -55,6 +55,14 @@ export const hash = (x: string): number => {
 
 export const camelCaseToHyphenated = (str: string) => str.replace(/([A-Z])/g, '-$1').toLowerCase();
 
+export const cssNormalizeValue = (value: string) => {
+  if(value.indexOf('#') > -1 || value.indexOf('var(')) {
+    return value;
+  } else {
+    return camelCaseToHyphenated(value);
+  }
+};
+
 export function ObjectKeys<T>(obj: T): (keyof T)[] {
   return Object.keys(obj as any) as (keyof T)[];
 }
