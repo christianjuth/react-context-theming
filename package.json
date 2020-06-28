@@ -1,6 +1,6 @@
 {
   "name": "react-context-theming",
-  "version": "1.0.0-alpha.81",
+  "version": "1.0.0-alpha.82",
   "description": "Customizable theme library written in TypeScript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -53,6 +53,8 @@
     "@babel/preset-react": "7.10.1",
     "@babel/preset-typescript": "7.10.1",
     "@commitlint/config-conventional": "9.0.1",
+    "@types/autoprefixer": "^9.7.2",
+    "@types/inline-style-prefixer": "^5.0.0",
     "@types/jest": "26.0.0",
     "@types/react": "16.9.38",
     "@types/react-dom": "16.9.8",
@@ -67,7 +69,8 @@
     "typescript": "3.9.5"
   },
   "dependencies": {
-    "css-vendor": "^2.0.8",
+    "autoprefixer": "^9.8.4",
+    "postcss-js": "^2.0.3",
     "react-native": "0.62.2"
   }
 }

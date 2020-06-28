@@ -21,6 +21,7 @@ export default function Home() {
           classes["link:hover"]
         ].join(' ')}>Page2</a>
       </Link>
+      <span className={classes.text}>Test</span>
     </ThemeProvider>
   )
 }
@@ -47,4 +48,9 @@ const styleCreator = makeStyleCreator(theme => ({
   linkActive: {
     color: theme.colors.accent
   },
+  text: {
+    color: '#f00',
+    display: 'flex',
+    fontSmoothing: 'auto',
+  }
 }))

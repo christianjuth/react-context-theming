@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 const AD_REPLACER_R = /(a)(d)/gi;
 
 /* This is the "capacity" of our alphabet i.e. 2x26 for all letters plus their capitalised
@@ -55,4 +57,16 @@ export const camelCaseToHyphenated = (str: string) => str.replace(/([A-Z])/g, '-
 
 export function ObjectKeys<T>(obj: T): (keyof T)[] {
   return Object.keys(obj as any) as (keyof T)[];
+}
+
+export function genearteId() {
+  return Date.now() + '';
+}
+
+export function useId() {
+  const [id, setId] = React.useState(genearteId());
+  React.useEffect(() => {
+    setId(genearteId());
+  }, []);
+  return id;
 }

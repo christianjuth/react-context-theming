@@ -22,7 +22,8 @@ const styleCreator = makeStyleCreator(theme => ({
   },
   text: {
     color: '#f00',
-    fontSmoothing: 'auto'
+    fontSmoothing: 'auto',
+    display: 'flex'
   },
   square: {
     height: 150,

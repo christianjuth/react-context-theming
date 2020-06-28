@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { Provider as ThemeProvider, defaultTheme, useTheme } from 'react-context-theming';
-import { makeStyleCreator, useStyleCreator } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator, getStyles } from 'react-context-theming/web';
 import { Button } from '../components';
 
 function FunctionComponents() {
   const styles = useStyleCreator(styleCreator);
   const {colors} = useTheme();
+
+  console.log(getStyles());
 
   return (
     <div style={styles.container}>

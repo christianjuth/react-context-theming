@@ -1,8 +1,18 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { generateComponentId, camelCaseToHyphenated, ObjectKeys } from './utils';
+import { generateComponentId, camelCaseToHyphenated, ObjectKeys, useId } from './utils';
 // @ts-ignore
-import * as cssVendor from 'css-vendor';
+import postcss from 'postcss-js';
+const prefixer = postcss.sync([ 
+  require('autoprefixer')({
+    overrideBrowserslist: [
+      '>1%',
+      'last 4 versions',
+      'Firefox ESR',
+      'not ie < 9',
+    ],
+  }) 
+]);
 
 export type NamedStyles<T> = { 
   [P in keyof T]: React.CSSProperties
@@ -44,7 +54,7 @@ export function useStyleCreatorClassNames<
   styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ) {
-  return generateCSS(useStyleCreator(styleFn));
+  return useCSS(useStyleCreator(styleFn));
 }
 
 export function withStyleCreator<
@@ -72,6 +82,8 @@ export function withStyleCreator<
 let style: HTMLStyleElement | null = null;
 if(typeof document !== 'undefined') {
   style = document.createElement("style");
+  style.type = 'text/css';
+  style.id = 'react-context-theming--Appended';
   // WebKit hack
   style?.appendChild(document.createTextNode(''));
   // Add the <style> element to the page
@@ -88,8 +100,16 @@ export const ref: {
 
 let priority = 0;
 let registeredStyles: any = {};
-function registerStyle(selector: string, css: string ) {
-  if(!registeredStyles[selector]) {
+function registerStyle({
+  selector,
+  css,
+  key,
+}: {
+  selector: string
+  css: string
+  key: string
+}) {
+  if(!registeredStyles[key]) {
     if(style?.sheet?.insertRule) {
       style?.sheet.insertRule(`${selector} ${css}`, priority);
     }
@@ -97,7 +117,7 @@ function registerStyle(selector: string, css: string ) {
       style?.sheet.addRule(selector, css, priority);
     }
     ref.styles[selector] = css;
-    registeredStyles[selector] = true;
+    registeredStyles[key] = true;
     ref.updateStyleSheet();
     priority++;
   }
@@ -119,7 +139,10 @@ export function StyleSheet() {
     }
   }, []);
   return (
-    <style>
+    <style 
+      type='text/css'
+      id='react-context-themeing--Component'
+    >
       {styles}
     </style>
   );
@@ -158,44 +181,79 @@ export function reactStylesToCSS<A, B>(styles: A): {
   [P in keyof A]: string;
 } {
   let output: any = {};
-  ObjectKeys(styles).forEach(key => {
-    let selectorStyles: any = {};
+  ObjectKeys(styles).forEach(async (key) => {
+    let selectorStyles: {
+      prop: string,
+      value: string
+    }[] = [];
     ObjectKeys(styles[key]).forEach(prop => {
       const val = styles[key][prop];
+    
       const computed = prefix({
-        prop: camelCaseToHyphenated(prop+''),
+        prop: prop+'',
         // number values should default to px unit
-        value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(camelCaseToHyphenated(prop+''), val) : val+''
-      })
-      selectorStyles[computed.prop] = computed.value;
+        value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(prop+'', val) : val+''
+      });
+
+      selectorStyles = selectorStyles.concat(computed);
     });
-    output[key] = '{'+Object.entries(selectorStyles).map(([k, v]) => `${k}:${v}`).join(';')+'}'
+    output[key] = '{'+selectorStyles.map(style => `${camelCaseToHyphenated(style.prop)}:${camelCaseToHyphenated(style.value)}`).join(';')+'}';
   });
   return output;
 }
 
 
-export function generateCSS<A>(styles: A): {
+export function useCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
+  const id = useId();
   const styleSheet = reactStylesToCSS(styles);
+  const environmant = typeof window === 'undefined' ? 'server' : 'browser';
 
   let classNames: any = {};
   ObjectKeys(styleSheet).map(key => {
     const css = styleSheet[key];
     const [,pseudo] = splitClassFromPseudo(key+'');
-    let className = generateComponentId(pseudo+css);
+    let className = `${generateComponentId(pseudo+css)}-${id}`;
     classNames[key] = className;
-    registerStyle('.'+className+pseudo, css);
+    registerStyle({
+      selector: '.'+className+pseudo,
+      css,
+      key: className+environmant+pseudo
+    });
   });
   return classNames;
 }
 
-export function prefix({prop, value}: {prop: string, value: string}) {
-  return {
-    prop: cssVendor.supportedProperty(prop),
-    value: cssVendor.supportedValue(prop, value)
+function prefix({ prop, value }: { prop: string, value: string }): {
+  prop: string,
+  value: string
+}[] {
+  const computed = prefixer({
+    [prop]: value
+  }) as {
+    [key: string]: any // string | string[]
   };
+  // TODO: check if this generates duplicate prop/value pairs
+  return Object.keys(computed).map(key => {
+    if(typeof computed[key] === 'string') {
+      return [
+        { prop, value },
+        {
+          prop: key,
+          value: computed[key]
+        }
+      ];
+    } else {
+      return [
+        { prop, value },
+        ...computed[key].map((val: string) => ({
+          prop: key,
+          value: val
+        })).reverse()
+      ]
+    }
+  })[0];
 }
 
 export function splitClassFromPseudo(selector: string) {

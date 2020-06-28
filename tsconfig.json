@@ -11,6 +11,7 @@
     "lib": [ "ESNext", "DOM" ],
     "baseUrl": ".",
     "strict": true,
+    "esModuleInterop": true,
     "paths": {
       "react-context-theming": [
         "*",
