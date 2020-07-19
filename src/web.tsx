@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { generateComponentId, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, useId } from './utils';
+import { processCSS, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, removeCSSExtras } from './utils';
 import { defaultTheme } from './constants';
 import { useUID, UIDReset, UIDFork } from 'react-uid';
+
+const CLASS_PREFIX = 'context';
 
 // @ts-ignore
 import postcss from 'postcss-js';
@@ -40,6 +42,8 @@ export function makeStyleCreator<
   );
 }
 
+
+
 export function useStyleCreator<
   T = Theme, 
   S = never
@@ -47,7 +51,7 @@ export function useStyleCreator<
   styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ) {
-  return styleFn(useTheme<T>(), ...extraData);
+  return removeCSSExtras(styleFn(useTheme<T>(), ...extraData));
 };
 
 export function useStyleCreatorClassNames<
@@ -57,7 +61,7 @@ export function useStyleCreatorClassNames<
   styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ) {
-  return useCSS(useStyleCreator(styleFn, ...extraData));
+  return useCSS(styleFn(useTheme<T>(), ...extraData));
 }
 
 export function withStyleCreator<
@@ -103,22 +107,17 @@ export const ref: {
 
 let registeredStyles: any = {};
 function registerStyle({
-  selector,
   css,
   key,
 }: {
-  selector: string
   css: string
   key: string
 }) {
   if(!registeredStyles[key]) {
     if(style?.sheet?.insertRule) {
-      style?.sheet.insertRule(`${selector} ${css}`, 0);
+      style?.sheet.insertRule(css, 0);
     }
-    // else if(style?.sheet?.addRule) {
-    //   style?.sheet.addRule(selector, css, priority);
-    // }
-    ref.styles[selector] = css;
+    ref.styles[key] = css;
     registeredStyles[key] = true;
     ref.updateStyleSheet();
   }
@@ -126,7 +125,8 @@ function registerStyle({
 
 
 export function getStyles() {
-  return Object.entries(ref.styles).map(([k, v]) => `${k} ${v}`).reverse().join(' ');
+  const out = Object.values(ref.styles).reverse().join(' ');
+  return out;
 }
 
 export function StyleSheet() {
@@ -178,28 +178,75 @@ export function addUnitToPeropertyIfNeeded(property: string, value: number) {
   return value + '';
 }
 
-export function reactStylesToCSS<A, B>(styles: A): {
-  [P in keyof A]: string;
+function processSelectorStyles<A, B>(selector: A, styles: B): {
+  [key: string]: {
+    [key: string]: string
+  }[]
+} {
+  const output: any = {};
+
+  let selectorStyles: {
+    prop: string,
+    value: string
+  }[] = [];
+
+  ObjectKeys(styles).forEach(prop => {
+    if ((prop+'').indexOf(':') === 0 || (prop+'').indexOf('@') === 0) {
+      Object.assign(output, processSelectorStyles(`${selector}${prop}`, styles[prop]));
+      return;
+    }
+
+    const val = styles[prop];
+  
+    const computed = prefix({
+      prop: prop+'',
+      // number values should default to px unit
+      value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(prop+'', val) : val+''
+    });
+
+    selectorStyles = selectorStyles.concat(computed);
+  });
+
+  return {
+    [selector+'']: selectorStyles,
+    ...output
+  };
+}
+
+/**
+ * Convert camcelCase CSS to standard CSS
+ */
+export function reactStylesToCSS<A extends { [key: string]: any }>(styles: A, id: string): {
+  [key: string]: string;
 } {
   let output: any = {};
-  ObjectKeys(styles).forEach(async (key) => {
-    let selectorStyles: {
-      prop: string,
-      value: string
-    }[] = [];
-    ObjectKeys(styles[key]).forEach(prop => {
-      const val = styles[key][prop];
-    
-      const computed = prefix({
-        prop: prop+'',
-        // number values should default to px unit
-        value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(prop+'', val) : val+''
-      });
 
-      selectorStyles = selectorStyles.concat(computed);
-    });
-    output[key] = '{'+selectorStyles.map(style => `${camelCaseToHyphenated(style.prop)}:${cssNormalizeValue(style.value)}`).join(';')+'}';
+  ObjectKeys(styles).forEach(async (key) => {
+    const selectorStyles = processSelectorStyles(key, styles[key]);
+    let className = `${CLASS_PREFIX}${id}-${key}`;
+
+    ObjectKeys(selectorStyles).forEach(selector => {
+      const query = (selector+'').match(/@.*/)?.[0];
+      const pseudo = (selector+'').match(/:.*/)?.[0] ?? '';
+
+      if(query) {
+output[selector] = `
+${query} {
+  .${className} { 
+    ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${cssNormalizeValue(style.value)}`).join(';')}
+  }
+}
+`;
+      } else {
+output[selector] = `
+.${className}${pseudo} { 
+  ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${cssNormalizeValue(style.value)}`).join(';')}
+}
+`;
+      }
+    })
   });
+
   return output;
 }
 
@@ -208,24 +255,34 @@ export function useCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
   const id = useUID();
-  const styleSheet = reactStylesToCSS(styles);
+  const styleSheet = reactStylesToCSS(styles, id);
+  const environmant = typeof window === 'undefined' ? 'server' : 'browser';
 
   let classNames: any = {};
-  ObjectKeys(styleSheet).map(key => {
-    const css = styleSheet[key];
-    const [,pseudo] = splitClassFromPseudo(key+'');
-    let className = `${generateComponentId(pseudo+css)}-${id}`;
+  ObjectKeys(styleSheet).reverse().map(key => {
+    const css = processCSS(styleSheet[key]);
+    let className = `${CLASS_PREFIX}${id}-${key}`;
+
     classNames[key] = className;
     registerStyle({
-      selector: '.'+className+pseudo,
       css,
-      key: className+pseudo
+      key: className+environmant
     });
   });
   return classNames;
 }
 
-function prefix({ prop, value }: { prop: string, value: string }): {
+
+/**
+ * Apply vendor prefixes where needed
+ */
+function prefix({ 
+  prop, 
+  value 
+}: { 
+  prop: string
+  value: string 
+}): {
   prop: string,
   value: string
 }[] {
@@ -243,13 +300,19 @@ function prefix({ prop, value }: { prop: string, value: string }): {
           value: computed[key]
         }
       ];
-    } else {
+    } 
+    
+    else if(typeof computed[key] === 'object') {
       return [
         ...computed[key].map((val: string) => ({
           prop: key,
           value: val
         }))
       ]
+    }
+
+    else {
+      return [];
     }
   })[0];
 
@@ -270,10 +333,6 @@ function prefix({ prop, value }: { prop: string, value: string }): {
   return output;
 }
 
-export function splitClassFromPseudo(selector: string) {
-  const split = selector.split(':');
-  return [split[0], split[1] ? ':'+split[1] : ''];
-}
 
 export function Provider<T = Theme>({ 
   theme = defaultTheme as any,
@@ -289,4 +348,22 @@ export function Provider<T = Theme>({
       </UIDReset>
     </Context.Provider>
   );
+}
+
+
+/**
+ * Used to wrap async components like suspense
+ * Nessesary if using suspense to keep classNames
+ * consistent on SSR and client
+ */
+export function Fork({
+  children
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <UIDFork>
+      {children}
+    </UIDFork>
+  )
 }

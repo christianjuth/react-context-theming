@@ -1,6 +1,5 @@
 import React from 'react';
-import { makeStyleCreator, useStyleCreatorClassNames, Provider as ThemeProvider } from 'react-context-theming/web';
-import { defaultTheme } from 'react-context-theming';
+import { makeStyleCreator, useStyleCreatorClassNames, useStyleCreator } from 'react-context-theming/web';
 
 function Box({
   className
@@ -18,32 +17,52 @@ function Box({
   )
 }
 
-function Page() {
+export default function Page() {
   const classes = useStyleCreatorClassNames(styleCreator);
   return (
-    <Box
-      className={classes.blueBox}
-    />
+    <>
+      <div
+        className={[
+          classes.blueBox,
+          classes.greenBox
+        ].join(' ')}
+      />
+      <div
+        className={[
+          classes.blueBox,
+          classes.greenBox
+        ].join(' ')}
+      />
+      <Box
+        className={classes.blueBox}
+      />
+    </>
   )
 }
 
-export default () => {
-  return (
-    <ThemeProvider theme={defaultTheme}>
-      <Page/>
-    </ThemeProvider>
-  )
-};
-
 const styleCreator = makeStyleCreator(() => ({
+  blueBox: {
+    height: 100,
+    width: 100,
+    backgroundColor: '#00f'
+  },
   redBox: {
     height: 100,
     width: 100,
     backgroundColor: '#f00'
   },
-  blueBox: {
+  greenBox: {
     height: 100,
     width: 100,
-    backgroundColor: '#00f'
+    backgroundColor: '#0f0',
+    ':first-child': {
+      backgroundColor: '#f00'
+    },
+    ':hover': {
+      backgroundColor: '#f00'
+    },
+    '@media only screen and (max-width: 600px)': {
+      width: 200
+    }
   }
 }))
