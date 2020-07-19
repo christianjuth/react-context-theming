@@ -7,8 +7,6 @@ function FunctionComponents() {
   const styles = useStyleCreator(styleCreator);
   const {colors} = useTheme();
 
-  console.log(getStyles());
-
   return (
     <div style={styles.container}>
       <h1 style={styles.text}>Function Components</h1>

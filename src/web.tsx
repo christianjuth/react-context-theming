@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
 import { generateComponentId, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, useId } from './utils';
+import { defaultTheme } from './constants';
+import { useUID, UIDReset, UIDFork } from 'react-uid';
+
 // @ts-ignore
 import postcss from 'postcss-js';
 const prefixer = postcss.sync([ 
@@ -98,7 +101,6 @@ export const ref: {
   updateStyleSheet: () => {}
 }
 
-let priority = 0;
 let registeredStyles: any = {};
 function registerStyle({
   selector,
@@ -111,21 +113,20 @@ function registerStyle({
 }) {
   if(!registeredStyles[key]) {
     if(style?.sheet?.insertRule) {
-      style?.sheet.insertRule(`${selector} ${css}`, priority);
+      style?.sheet.insertRule(`${selector} ${css}`, 0);
     }
-    else if(style?.sheet?.addRule) {
-      style?.sheet.addRule(selector, css, priority);
-    }
+    // else if(style?.sheet?.addRule) {
+    //   style?.sheet.addRule(selector, css, priority);
+    // }
     ref.styles[selector] = css;
     registeredStyles[key] = true;
     ref.updateStyleSheet();
-    priority++;
   }
 }
 
 
 export function getStyles() {
-  return Object.entries(ref.styles).map(([k, v]) => `${k} ${v}`).join(' ');
+  return Object.entries(ref.styles).map(([k, v]) => `${k} ${v}`).reverse().join(' ');
 }
 
 export function StyleSheet() {
@@ -206,9 +207,8 @@ export function reactStylesToCSS<A, B>(styles: A): {
 export function useCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
-  const id = useId();
+  const id = useUID();
   const styleSheet = reactStylesToCSS(styles);
-  const environmant = typeof window === 'undefined' ? 'server' : 'browser';
 
   let classNames: any = {};
   ObjectKeys(styleSheet).map(key => {
@@ -219,7 +219,7 @@ export function useCSS<A>(styles: A): {
     registerStyle({
       selector: '.'+className+pseudo,
       css,
-      key: className+environmant+pseudo
+      key: className+pseudo
     });
   });
   return classNames;
@@ -235,28 +235,58 @@ function prefix({ prop, value }: { prop: string, value: string }): {
     [key: string]: any // string | string[]
   };
   // TODO: check if this generates duplicate prop/value pairs
-  return Object.keys(computed).map(key => {
+  const output = Object.keys(computed).map(key => {
     if(typeof computed[key] === 'string') {
       return [
         {
           prop: key,
           value: computed[key]
-        },
-        { prop, value }
+        }
       ];
     } else {
       return [
         ...computed[key].map((val: string) => ({
           prop: key,
           value: val
-        })),
-        { prop, value }
+        }))
       ]
     }
   })[0];
+
+  let containsOriginal = false;
+  output.forEach(style => {
+    if(style.prop === prop && style.value === value) {
+      containsOriginal = true;
+    }
+  })
+
+  // Sometimes prefix does not include
+  // the original value in which case
+  // we add it to the end of the array
+  if (!containsOriginal) {
+    output.push({prop, value})
+  }
+
+  return output;
 }
 
 export function splitClassFromPseudo(selector: string) {
   const split = selector.split(':');
   return [split[0], split[1] ? ':'+split[1] : ''];
+}
+
+export function Provider<T = Theme>({ 
+  theme = defaultTheme as any,
+  children
+}: { 
+  theme: T,
+  children: React.ReactNode
+}) {
+  return (
+    <Context.Provider value={theme}>
+      <UIDReset>
+        {children}
+      </UIDReset>
+    </Context.Provider>
+  );
 }
