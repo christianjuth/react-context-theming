@@ -114,7 +114,9 @@ function registerStyle({
   key: string
 }) {
   if(!registeredStyles[key]) {
+    // @ts-ignore
     if(style?.sheet?.insertRule) {
+      // @ts-ignore
       style?.sheet.insertRule(css, 0);
     }
     ref.styles[key] = css;
@@ -123,6 +125,11 @@ function registerStyle({
   }
 }
 
+function resetStyles() {
+  ref.styles = {};
+  registeredStyles = {};
+  ref.updateStyleSheet();
+}
 
 export function getStyles() {
   const out = Object.values(ref.styles).reverse().join(' ');
@@ -131,6 +138,7 @@ export function getStyles() {
 
 export function StyleSheet() {
   const [styles, setStyles] = React.useState(getStyles());
+
   React.useEffect(() => {
     ref.updateStyleSheet = () => {
       setStyles(getStyles());
@@ -139,6 +147,7 @@ export function StyleSheet() {
       ref.updateStyleSheet = () => {}
     }
   }, []);
+
   return (
     <style 
       type='text/css'
@@ -341,6 +350,11 @@ export function Provider<T = Theme>({
   theme: T,
   children: React.ReactNode
 }) {
+
+  if (typeof window === 'undefined') {
+    resetStyles();
+  }
+
   return (
     <Context.Provider value={theme}>
       <UIDReset>
