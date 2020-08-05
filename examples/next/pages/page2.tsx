@@ -1,14 +1,19 @@
 import React from 'react';
 import { makeStyleCreator, useStyleCreatorClassNames } from 'react-context-theming/web';
-import { Provider as ThemeProvider, defaultTheme } from 'react-context-theming'
+import Link from 'next/link';
 
 
 export default function Home() {
   const classes = useStyleCreatorClassNames(styleCreator);
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <>
+      <Link href='/'>
+        <a>
+          page2
+        </a>
+      </Link>
       <div className={classes.box} />
-    </ThemeProvider>
+    </>
   )
 }
 
@@ -16,7 +21,6 @@ const styleCreator = makeStyleCreator(theme => ({
   box: {
     height: 100,
     width: 100,
-    backgroundColor: '#0f0',
-    borderBottomColor: 'rgba(0,0,0,0.1)'
+    backgroundColor: '#f00'
   }
 }))

@@ -1,5 +1,6 @@
 import React from 'react';
 import { makeStyleCreator, useStyleCreatorClassNames, useStyleCreator } from 'react-context-theming/web';
+import Link from 'next/link';
 
 function Box({
   className
@@ -21,6 +22,11 @@ export default function Page() {
   const classes = useStyleCreatorClassNames(styleCreator);
   return (
     <>
+      <Link href='/page2'>
+        <a>
+          page2
+        </a>
+      </Link>
       <div
         className={[
           classes.blueBox,

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { processCSS, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, removeCSSExtras } from './utils';
+import { generateComponentId, processCSS, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, removeCSSExtras } from './utils';
 import { defaultTheme } from './constants';
-import { useUID, UIDReset, UIDFork } from 'react-uid';
+import { useStore, useId, useDispatch, storeActions, StoreProvider } from './web-store';
 
 const CLASS_PREFIX = 'context';
 
@@ -86,78 +86,29 @@ export function withStyleCreator<
   };
 }
 
-let style: HTMLStyleElement | null = null;
-if(typeof document !== 'undefined') {
-  style = document.createElement("style");
-  style.type = 'text/css';
-  style.id = 'react-context-theming--Appended';
-  // WebKit hack
-  style?.appendChild(document.createTextNode(''));
-  // Add the <style> element to the page
-  document.head.appendChild(style);
-}
-
-export const ref: {
-  styles: any,
-  updateStyleSheet: () => any
-} = {
-  styles: {},
-  updateStyleSheet: () => {}
-}
-
-let registeredStyles: any = {};
-function registerStyle({
-  css,
-  key,
-}: {
-  css: string
-  key: string
-}) {
-  if(!registeredStyles[key]) {
-    // @ts-ignore
-    if(style?.sheet?.insertRule) {
-      // @ts-ignore
-      style?.sheet.insertRule(css, 0);
-    }
-    ref.styles[key] = css;
-    registeredStyles[key] = true;
-    ref.updateStyleSheet();
-  }
-}
-
-function resetStyles() {
-  ref.styles = {};
-  registeredStyles = {};
-  ref.updateStyleSheet();
-}
-
-export function getStyles() {
-  const out = Object.values(ref.styles).reverse().join(' ');
-  return out;
-}
-
 export function StyleSheet() {
-  const [styles, setStyles] = React.useState(getStyles());
-
-  React.useEffect(() => {
-    ref.updateStyleSheet = () => {
-      setStyles(getStyles());
-    };
-    return () => {
-      ref.updateStyleSheet = () => {}
-    }
-  }, []);
+  const { styles } = useStore();
+  const computedStyles = Object.values(styles).reverse().join(' ');
 
   return (
     <style 
       type='text/css'
       id='react-context-themeing--Component'
+      scoped
     >
-      {styles}
+      {computedStyles}
     </style>
   );
 }
 
+/**
+ * Style API allows the user to specify just a
+ * number for many properties with px being inferred.
+ * This function adds the px to properties that support
+ * this feature.
+ * 
+ * Example: "padding: 10" becomes "padding: 10px"
+ */
 export function addUnitToPeropertyIfNeeded(property: string, value: number) {
   const match = [
     'width',
@@ -263,21 +214,46 @@ output[selector] = `
 export function useCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
-  const id = useUID();
+  const id = useId();
+  const dispatch = useDispatch();
+  const { styles: oldStyles } = useStore();
+  const updateKey = React.useRef(0); 
+
   const styleSheet = reactStylesToCSS(styles, id);
-  const environmant = typeof window === 'undefined' ? 'server' : 'browser';
+  // const environmant = typeof window === 'undefined' ? 'server' : 'browser';
 
-  let classNames: any = {};
-  ObjectKeys(styleSheet).reverse().map(key => {
-    const css = processCSS(styleSheet[key]);
-    let className = `${CLASS_PREFIX}${id}-${key}`;
+  const dispatchMap: any = {};
 
+  const classNames: any = {};
+  ObjectKeys(styleSheet).map(key => {
+
+    const className = `${CLASS_PREFIX}${id}-${key+''}`;
     classNames[key] = className;
-    registerStyle({
-      css,
-      key: className+environmant
-    });
+
+    const oldCSS = oldStyles[key];
+    const css = processCSS(styleSheet[key]);
+
+    if (oldCSS !== css) {
+      updateKey.current++;
+      dispatchMap[className] = css;
+    }
+
   });
+
+  React.useEffect(() => {
+    
+    Object.keys(dispatchMap).map(key => {
+
+      const css = dispatchMap[key];
+      dispatch(storeActions.registerStyle({
+        css,
+        key: key+''
+      }))
+
+    });
+
+  }, [updateKey]);
+
   return classNames;
 }
 
@@ -351,33 +327,11 @@ export function Provider<T = Theme>({
   children: React.ReactNode
 }) {
 
-  if (typeof window === 'undefined') {
-    resetStyles();
-  }
-
   return (
-    <Context.Provider value={theme}>
-      <UIDReset>
+    <StoreProvider>
+      <Context.Provider value={theme}>
         {children}
-      </UIDReset>
-    </Context.Provider>
+      </Context.Provider>
+    </StoreProvider>
   );
-}
-
-
-/**
- * Used to wrap async components like suspense
- * Nessesary if using suspense to keep classNames
- * consistent on SSR and client
- */
-export function Fork({
-  children
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <UIDFork>
-      {children}
-    </UIDFork>
-  )
 }
