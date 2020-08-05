@@ -34,7 +34,8 @@ const reducer = (state: StyleReducerState, action: any) => {
 const StoreContext = React.createContext<{
   state: StyleReducerState,
   dispatch: React.Dispatch<any>,
-  conponentIdRef?: React.MutableRefObject<number>
+  conponentIdRef?: React.MutableRefObject<number>,
+  serverStyles?: React.MutableRefObject<{ [key: string]: any }>
 }>({
   state: initialState,
   dispatch: () => {}
@@ -47,15 +48,16 @@ export function StoreProvider({
 }) {
   const [ state, dispatch ] = React.useReducer(reducer, initialState);
   const conponentIdRef = React.useRef(0);
+  const serverStyles = React.useRef({});
   return (
-    <StoreContext.Provider value={{ state, dispatch, conponentIdRef }}>
+    <StoreContext.Provider value={{ state, dispatch, conponentIdRef, serverStyles }}>
       {children}
     </StoreContext.Provider>
   )
 }
 
 export function useStore() {
-  return React.useContext(StoreContext).state;
+  return React.useContext(StoreContext);
 }
 
 export function useDispatch() {

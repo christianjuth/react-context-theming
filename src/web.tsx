@@ -87,14 +87,17 @@ export function withStyleCreator<
 }
 
 export function StyleSheet() {
-  const { styles } = useStore();
-  const computedStyles = Object.values(styles).reverse().join(' ');
+  const { state, serverStyles } = useStore();
+
+  const computedStyles = Object.values({
+    ...state.styles,
+    ...serverStyles?.current
+  }).reverse().join(' ');
 
   return (
     <style 
       type='text/css'
       id='react-context-themeing--Component'
-      scoped
     >
       {computedStyles}
     </style>
@@ -216,13 +219,14 @@ export function useCSS<A>(styles: A): {
 } {
   const id = useId();
   const dispatch = useDispatch();
-  const { styles: oldStyles } = useStore();
+  const { state, serverStyles } = useStore();
   const updateKey = React.useRef(0); 
+  let requestSSR = false
 
   const styleSheet = reactStylesToCSS(styles, id);
   // const environmant = typeof window === 'undefined' ? 'server' : 'browser';
 
-  const dispatchMap: any = {};
+  const computedStyles: any = {};
 
   const classNames: any = {};
   ObjectKeys(styleSheet).map(key => {
@@ -230,21 +234,44 @@ export function useCSS<A>(styles: A): {
     const className = `${CLASS_PREFIX}${id}-${key+''}`;
     classNames[key] = className;
 
-    const oldCSS = oldStyles[key];
+    const oldCSS = state.styles[key];
     const css = processCSS(styleSheet[key]);
+
+    if (oldCSS === undefined) {
+      requestSSR = true;
+    }
 
     if (oldCSS !== css) {
       updateKey.current++;
-      dispatchMap[className] = css;
+      computedStyles[className] = css;
     }
 
   });
 
+  // check for SSR
+  if (requestSSR && serverStyles) {
+    let componentStyles: any = {};
+
+    Object.keys(computedStyles).map(key => {
+      const css = computedStyles[key];
+
+      componentStyles = {
+        [key]: css,
+        ...componentStyles
+      }
+    });
+
+    serverStyles.current = {
+      ...serverStyles.current,
+      ...componentStyles
+    }
+  }
+
   React.useEffect(() => {
     
-    Object.keys(dispatchMap).map(key => {
+    Object.keys(computedStyles).map(key => {
 
-      const css = dispatchMap[key];
+      const css = computedStyles[key];
       dispatch(storeActions.registerStyle({
         css,
         key: key+''
@@ -331,6 +358,7 @@ export function Provider<T = Theme>({
     <StoreProvider>
       <Context.Provider value={theme}>
         {children}
+        <StyleSheet/>
       </Context.Provider>
     </StoreProvider>
   );

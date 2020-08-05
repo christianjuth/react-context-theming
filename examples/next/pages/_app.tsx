@@ -9,7 +9,6 @@ class App extends NextApp {
     const { Component, pageProps } = this.props;
     return (
       <ThemeProvider theme={defaultTheme}>
-        <StyleSheet/>
         <Component {...pageProps}/>
       </ThemeProvider>
     );
