@@ -1,6 +1,6 @@
 {
   "name": "react-context-theming",
-  "version": "1.0.0-alpha.828",
+  "version": "1.0.0-alpha.829",
   "description": "Customizable theme library written in TypeScript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -70,7 +70,6 @@
   },
   "dependencies": {
     "autoprefixer": "9.8.5",
-    "postcss-js": "^2.0.3",
     "react-native": "0.62.2",
     "react-uid": "^2.3.0"
   }

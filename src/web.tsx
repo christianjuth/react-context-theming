@@ -1,23 +1,10 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { generateComponentId, processCSS, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, removeCSSExtras } from './utils';
+import { processCSS, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, removeCSSExtras } from './utils';
 import { defaultTheme } from './constants';
 import { useStore, useId, useDispatch, storeActions, StoreProvider } from './web-store';
 
 const CLASS_PREFIX = 'context';
-
-// @ts-ignore
-import postcss from 'postcss-js';
-const prefixer = postcss.sync([ 
-  require('autoprefixer')({
-    overrideBrowserslist: [
-      '>1%',
-      'last 4 versions',
-      'Firefox ESR',
-      'not ie < 9',
-    ],
-  }) 
-]);
 
 export type NamedStyles<T> = { 
   [P in keyof T]: React.CSSProperties
@@ -160,14 +147,12 @@ function processSelectorStyles<A, B>(selector: A, styles: B): {
     }
 
     const val = styles[prop];
-  
-    const computed = prefix({
+
+    selectorStyles.push({
       prop: prop+'',
       // number values should default to px unit
       value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(prop+'', val) : val+''
-    });
-
-    selectorStyles = selectorStyles.concat(computed);
+    })
   });
 
   return {
@@ -282,67 +267,6 @@ export function useCSS<A>(styles: A): {
   }, [updateKey]);
 
   return classNames;
-}
-
-
-/**
- * Apply vendor prefixes where needed
- */
-function prefix({ 
-  prop, 
-  value 
-}: { 
-  prop: string
-  value: string 
-}): {
-  prop: string,
-  value: string
-}[] {
-  const computed = prefixer({
-    [prop]: value
-  }) as {
-    [key: string]: any // string | string[]
-  };
-  // TODO: check if this generates duplicate prop/value pairs
-  const output = Object.keys(computed).map(key => {
-    if(typeof computed[key] === 'string') {
-      return [
-        {
-          prop: key,
-          value: computed[key]
-        }
-      ];
-    } 
-    
-    else if(typeof computed[key] === 'object') {
-      return [
-        ...computed[key].map((val: string) => ({
-          prop: key,
-          value: val
-        }))
-      ]
-    }
-
-    else {
-      return [];
-    }
-  })[0];
-
-  let containsOriginal = false;
-  output.forEach(style => {
-    if(style.prop === prop && style.value === value) {
-      containsOriginal = true;
-    }
-  })
-
-  // Sometimes prefix does not include
-  // the original value in which case
-  // we add it to the end of the array
-  if (!containsOriginal) {
-    output.push({prop, value})
-  }
-
-  return output;
 }
 
 
