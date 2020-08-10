@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { processCSS, camelCaseToHyphenated, cssNormalizeValue, ObjectKeys, removeCSSExtras } from './utils';
+import { processCSS, camelCaseToHyphenated, ObjectKeys, removeCSSExtras } from './utils';
 import { defaultTheme } from './constants';
 import { useStore, useId, useDispatch, storeActions, StoreProvider } from './web-store';
 
@@ -181,14 +181,14 @@ export function reactStylesToCSS<A extends { [key: string]: any }>(styles: A, id
 output[selector] = `
 ${query} {
   .${className} { 
-    ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${cssNormalizeValue(style.value)}`).join(';')}
+    ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${style.value}`).join(';')}
   }
 }
 `;
       } else {
 output[selector] = `
 .${className}${pseudo} { 
-  ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${cssNormalizeValue(style.value)}`).join(';')}
+  ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${style.value}`).join(';')}
 }
 `;
       }
