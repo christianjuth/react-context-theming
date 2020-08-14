@@ -74,12 +74,8 @@ export function withStyleCreator<
 }
 
 export function StyleSheet() {
-  const { state, serverStyles } = useStore();
-
-  const computedStyles = Object.values({
-    ...state.styles,
-    ...serverStyles?.current
-  }).reverse().join(' ');
+  const { state } = useStore();
+  const computedStyles = Object.values(state.styles).reverse().join(' ');
 
   return (
     <style 
@@ -202,11 +198,12 @@ output[selector] = `
 export function useCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
+  const serverStyles = React.useContext(ServerStyleSheetContext);
   const id = useId();
   const dispatch = useDispatch();
-  const { state, serverStyles } = useStore();
+  const { state } = useStore();
   const updateKey = React.useRef(0); 
-  let requestSSR = false
+  let requestSSR = false;
 
   const styleSheet = reactStylesToCSS(styles, id);
   // const environmant = typeof window === 'undefined' ? 'server' : 'browser';
@@ -286,4 +283,36 @@ export function Provider<T = Theme>({
       </Context.Provider>
     </StoreProvider>
   );
+}
+
+const ServerStyleSheetContext = React.createContext({ current: {} });
+
+export class ServerStyleSheet {
+  styles = {
+    current: {}
+  };
+
+  getStyleElement() {
+    const computedStyles = Object.values({
+      ...this.styles.current
+    }).reverse().join(' ');
+  
+    return (
+      <style 
+        type='text/css'
+        id='react-context-themeing--SSR'
+      >
+        {computedStyles}
+      </style>
+    );
+  }
+
+  collectStyles(children: any) {
+    return (
+      <ServerStyleSheetContext.Provider value={this.styles}>
+        {children}
+      </ServerStyleSheetContext.Provider>
+    );
+  }
+
 }

@@ -48,9 +48,8 @@ export function StoreProvider({
 }) {
   const [ state, dispatch ] = React.useReducer(reducer, initialState);
   const conponentIdRef = React.useRef(0);
-  const serverStyles = React.useRef({});
   return (
-    <StoreContext.Provider value={{ state, dispatch, conponentIdRef, serverStyles }}>
+    <StoreContext.Provider value={{ state, dispatch, conponentIdRef }}>
       {children}
     </StoreContext.Provider>
   )

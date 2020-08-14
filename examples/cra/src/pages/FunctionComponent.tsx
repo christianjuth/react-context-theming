@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Provider as ThemeProvider, defaultTheme, useTheme } from 'react-context-theming';
-import { makeStyleCreator, useStyleCreator, getStyles } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator } from 'react-context-theming/web';
 import { Button } from '../components';
 
 function FunctionComponents() {
