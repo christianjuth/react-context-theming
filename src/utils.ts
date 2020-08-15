@@ -30,7 +30,7 @@ function fixIndentation(code: string) {
 }
 
 export function prettyCSS(css: string) {
-  return fixIndentation(css).replace(/\./g, '\n\n.');
+  return fixIndentation(css).replace(/(\n|\r)\./g, '\n\n\n.');
 }
 
 export function minifyCSS(css: string) {
@@ -38,7 +38,7 @@ export function minifyCSS(css: string) {
 }
 
 export function processCSS(css: string) {
-  return !IS_DEV ? prettyCSS(css) : minifyCSS(css);
+  return IS_DEV ? prettyCSS(css) : minifyCSS(css);
 }
 
 /**
