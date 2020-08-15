@@ -30,7 +30,7 @@ function fixIndentation(code: string) {
 }
 
 export function prettyCSS(css: string) {
-  return fixIndentation(css).replace(/(\n|\r)\./g, '\n\n\n.');
+  return fixIndentation(css).replace(/}\s*\./g, '}\n\n.');
 }
 
 export function minifyCSS(css: string) {
