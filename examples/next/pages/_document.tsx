@@ -26,16 +26,14 @@ export default class MyDocument extends Document {
         ),
       }
     } finally {
-      // sheet.seal()
+      sheet.seal()
     }
   }
 
   render() {
     return (
       <html>
-        <Head>
-          {this.props.styles}
-        </Head>
+        <Head/>
         <body>
           <Main />
           <NextScript />

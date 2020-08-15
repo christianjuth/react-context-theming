@@ -5,7 +5,8 @@ type StyleReducerState = {
 }
 
 const types = {
-  REGISTER_STYLE: 'REGISTER_STYLE'
+  REGISTER_STYLE: 'REGISTER_STYLE',
+  DEREGISTER_STYLE: 'DEREGISTER_STYLE'
 }
 
 const initialState: StyleReducerState = {
@@ -25,6 +26,16 @@ const reducer = (state: StyleReducerState, action: any) => {
       return {
         ...state,
         styles
+      }
+    case types.DEREGISTER_STYLE: 
+      // register styles if it doesn't already exsist
+      const stylesClone = {
+        ...state.styles 
+      };
+      delete stylesClone[action.payload.key]
+      return {
+        ...state,
+        styles: stylesClone
       }
     default:
       return state;
@@ -76,6 +87,17 @@ export const storeActions = {
     payload: {
       key,
       css
+    }
+  }),
+
+  deregisterStyle: ({
+    key
+  }: {
+    key: string
+  }) => ({
+    type: types.DEREGISTER_STYLE,
+    payload: {
+      key
     }
   })
 

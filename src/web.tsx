@@ -1,14 +1,23 @@
 import * as React from 'react';
 import { useTheme, Context, Theme } from './index';
-import { processCSS, camelCaseToHyphenated, ObjectKeys, removeCSSExtras } from './utils';
-import { defaultTheme } from './constants';
+import { 
+  processCSS, 
+  ObjectKeys, 
+  removeClassOnlyStyles, 
+  oneTimeWarn, 
+  camelCaseStylesToVanillaCSS
+} from './utils';
+import { defaultTheme, IS_BROWSER, IS_SERVER, VERSION, CLASS_PREFIX } from './constants';
 import { useStore, useId, useDispatch, storeActions, StoreProvider } from './web-store';
-
-const CLASS_PREFIX = 'context';
 
 export type NamedStyles<T> = { 
   [P in keyof T]: React.CSSProperties
 };
+
+export type ObjectWithStringKey<Value> = {
+  [key: string]: Value
+}
+export type ComputedStyles = ObjectWithStringKey<string>;
 
 export type StyleCreatorFunction<T, S> = (theme: T, ...extraData: any[]) => NamedStyles<S>;
 export type GenerateStylesFunction<T, S> = (theme: T, ...extraData: any[]) => S;
@@ -38,7 +47,7 @@ export function useStyleCreator<
   styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ) {
-  return removeCSSExtras(styleFn(useTheme<T>(), ...extraData));
+  return removeClassOnlyStyles(styleFn(useTheme<T>(), ...extraData));
 };
 
 export function useStyleCreatorClassNames<
@@ -73,6 +82,34 @@ export function withStyleCreator<
   };
 }
 
+export function Provider<T = Theme>({ 
+  theme = defaultTheme as any,
+  children
+}: { 
+  theme: T,
+  children: React.ReactNode
+}) {
+
+  // Cleanup after first render
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll(`[data-name="${CLASS_PREFIX}__ServerStyleSheet"]`).forEach(elm => {
+        elm.innerHTML = '';
+        elm.setAttribute('data-active', 'false');
+      });
+    }
+  }, []);
+
+  return (
+    <StoreProvider>
+      <Context.Provider value={theme}>
+        <StyleSheet/>
+        {children}
+      </Context.Provider>
+    </StoreProvider>
+  );
+}
+
 export function StyleSheet() {
   const { state } = useStore();
   const computedStyles = Object.values(state.styles).reverse().join(' ');
@@ -80,135 +117,30 @@ export function StyleSheet() {
   return (
     <style 
       type='text/css'
-      id='react-context-themeing--Component'
+      data-name={`${CLASS_PREFIX}__StyleSheet`}
+      data-version={VERSION}
     >
       {computedStyles}
     </style>
   );
 }
 
-/**
- * Style API allows the user to specify just a
- * number for many properties with px being inferred.
- * This function adds the px to properties that support
- * this feature.
- * 
- * Example: "padding: 10" becomes "padding: 10px"
- */
-export function addUnitToPeropertyIfNeeded(property: string, value: number) {
-  const match = [
-    'width',
-    'height',
-    'padding',
-    'margin',
-    'radius',
-    'spacing',
-    'offset',
-    'outset',
-    'gap'
-  ];
-  for(let i = 0; i < match.length; i++) {
-    if(property.toLowerCase().indexOf(match[i]) > -1) {
-      return value + 'px';
-    }
-  }
-  const exactMatch = [
-    'top',
-    'right',
-    'bottom',
-    'left'
-  ];
-  if(exactMatch.indexOf(property) > -1) {
-    return value + 'px';
-  }
-  return value + '';
-}
-
-function processSelectorStyles<A, B>(selector: A, styles: B): {
-  [key: string]: {
-    [key: string]: string
-  }[]
-} {
-  const output: any = {};
-
-  let selectorStyles: {
-    prop: string,
-    value: string
-  }[] = [];
-
-  ObjectKeys(styles).forEach(prop => {
-    if ((prop+'').indexOf(':') === 0 || (prop+'').indexOf('@') === 0) {
-      Object.assign(output, processSelectorStyles(`${selector}${prop}`, styles[prop]));
-      return;
-    }
-
-    const val = styles[prop];
-
-    selectorStyles.push({
-      prop: prop+'',
-      // number values should default to px unit
-      value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(prop+'', val) : val+''
-    })
-  });
-
-  return {
-    [selector+'']: selectorStyles,
-    ...output
-  };
-}
-
-/**
- * Convert camcelCase CSS to standard CSS
- */
-export function reactStylesToCSS<A extends { [key: string]: any }>(styles: A, id: string): {
-  [key: string]: string;
-} {
-  let output: any = {};
-
-  ObjectKeys(styles).forEach(async (key) => {
-    const selectorStyles = processSelectorStyles(key, styles[key]);
-    let className = `${CLASS_PREFIX}${id}-${key}`;
-
-    ObjectKeys(selectorStyles).forEach(selector => {
-      const query = (selector+'').match(/@.*/)?.[0];
-      const pseudo = (selector+'').match(/:.*/)?.[0] ?? '';
-
-      if(query) {
-output[selector] = `
-${query} {
-  .${className} { 
-    ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${style.value}`).join(';')}
-  }
-}
-`;
-      } else {
-output[selector] = `
-.${className}${pseudo} { 
-  ${selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${style.value}`).join(';')}
-}
-`;
-      }
-    })
-  });
-
-  return output;
-}
-
 
 export function useCSS<A>(styles: A): {
   [P in keyof A]: string;
 } {
-  const serverStyles = React.useContext(ServerStyleSheetContext);
   const id = useId();
   const dispatch = useDispatch();
   const { state } = useStore();
   const updateKey = React.useRef(0); 
   let requestSSR = false;
 
-  const styleSheet = reactStylesToCSS(styles, id);
-  // const environmant = typeof window === 'undefined' ? 'server' : 'browser';
+  const styleSheet = camelCaseStylesToVanillaCSS(styles, id);
 
-  const computedStyles: any = {};
+  // attempt to access ServerStyleSheet
+  const serverStyles = React.useContext(ServerStyleSheetContext);
+
+  const computedStyles: ComputedStyles = {};
 
   const classNames: any = {};
   ObjectKeys(styleSheet).map(key => {
@@ -216,10 +148,11 @@ export function useCSS<A>(styles: A): {
     const className = `${CLASS_PREFIX}${id}-${key+''}`;
     classNames[key] = className;
 
-    const oldCSS = state.styles[key];
+    const oldCSS = state.styles[className] ?? serverStyles.current[className];
     const css = processCSS(styleSheet[key]);
 
-    if (oldCSS === undefined) {
+    // Enable SSR only on first render
+    if (IS_SERVER && oldCSS === undefined) {
       requestSSR = true;
     }
 
@@ -227,10 +160,10 @@ export function useCSS<A>(styles: A): {
       updateKey.current++;
       computedStyles[className] = css;
     }
-
   });
 
-  // check for SSR
+
+  // SSR - Append styles to ServerStyleSheet
   if (requestSSR && serverStyles) {
     let componentStyles: any = {};
 
@@ -249,48 +182,69 @@ export function useCSS<A>(styles: A): {
     }
   }
 
+  // register styles
   React.useEffect(() => {
     
-    Object.keys(computedStyles).map(key => {
+    Object.keys(computedStyles).map(className => {
 
-      const css = computedStyles[key];
+      const css = computedStyles[className];
       dispatch(storeActions.registerStyle({
         css,
-        key: key+''
-      }))
+        key: className+''
+      }));
 
     });
+  }, [updateKey.current]);
 
-  }, [updateKey]);
+  // deregister styles on unmount
+  React.useEffect(() => {
+    return () => {
+
+      setTimeout(() => {
+
+        ObjectKeys(styleSheet).map(key => {
+          const className = `${CLASS_PREFIX}${id}-${key+''}`;
+
+          dispatch(storeActions.deregisterStyle({
+            key: className+''
+          }));
+        });
+      }, 1000);
+
+    };
+  }, [id]);
 
   return classNames;
 }
 
 
-export function Provider<T = Theme>({ 
-  theme = defaultTheme as any,
-  children
-}: { 
-  theme: T,
-  children: React.ReactNode
-}) {
 
-  return (
-    <StoreProvider>
-      <Context.Provider value={theme}>
-        {children}
-        <StyleSheet/>
-      </Context.Provider>
-    </StoreProvider>
-  );
-}
 
-const ServerStyleSheetContext = React.createContext({ current: {} });
 
+const ServerStyleSheetContext = React.createContext<{ 
+  current: ComputedStyles 
+}>({ 
+  current: {} 
+});
+
+/**
+ * This component is used to collect styles durning SSR and
+ * emit a stylesheet that can be rendered inside the head tag.
+ * 
+ * This component is heavily inspired by Styled Components ServerStyleSheet.
+ * See https://github.com/styled-components/styled-components/blob/93a00472e3b9bf2974149e9d767e69e56659fbbb/packages/styled-components/src/models/ServerStyleSheet.js
+ */
 export class ServerStyleSheet {
-  styles = {
+  styles: {
+    current: ComputedStyles
+  } = {
     current: {}
   };
+  sealed: boolean = false;
+
+  seal() {
+    this.sealed = true;
+  }
 
   getStyleElement() {
     const computedStyles = Object.values({
@@ -300,7 +254,9 @@ export class ServerStyleSheet {
     return (
       <style 
         type='text/css'
-        id='react-context-themeing--SSR'
+        data-name={`${CLASS_PREFIX}__ServerStyleSheet`}
+        data-active='true'
+        data-version={VERSION}
       >
         {computedStyles}
       </style>
@@ -308,6 +264,11 @@ export class ServerStyleSheet {
   }
 
   collectStyles(children: any) {
+    if (this.sealed || IS_BROWSER) {
+      oneTimeWarn('attempted to collect styles after ServerStyleSheet was sealed.')
+      return children;
+    }
+
     return (
       <ServerStyleSheetContext.Provider value={this.styles}>
         {children}

@@ -4,7 +4,17 @@ import Link from 'next/link';
 
 
 export default function Home() {
-  const classes = useStyleCreatorClassNames(styleCreator);
+  const [color, setColor] = React.useState('#f00');
+  const classes = useStyleCreatorClassNames(styleCreator, color);
+
+  console.log(color)
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setColor('#0f0');
+    }, 1000); 
+  }, []);
+
   return (
     <>
       <Link href='/'>
@@ -17,10 +27,10 @@ export default function Home() {
   )
 }
 
-const styleCreator = makeStyleCreator(theme => ({
+const styleCreator = makeStyleCreator((theme, color: string) => ({
   box: {
     height: 100,
     width: 100,
-    backgroundColor: '#f00'
+    backgroundColor: color
   }
 }))

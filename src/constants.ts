@@ -1,6 +1,14 @@
-import { 
-  Theme
-} from './index';
+import { Theme } from './index';
+
+// @ts-ignore
+export const { version: VERSION } = require('../package.json');
+
+export const IS_DEV = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+
+export const IS_BROWSER = typeof window !== 'undefined';
+export const IS_SERVER = !IS_BROWSER;
+
+export const CLASS_PREFIX = 'context';
 
 /**
  * @ignore
