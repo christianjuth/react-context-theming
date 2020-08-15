@@ -1,20 +1,20 @@
 import React from 'react';
-import { makeStyleCreator, useStyleCreatorClassNames } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator, useClassGenerator } from 'react-context-theming/web';
 import Link from 'next/link';
 
 function Box() {
-  const classes = useStyleCreatorClassNames(styleCreator);
+  const styles = useStyleCreator(styleCreator);
+  const cg = useClassGenerator();
+
   return (
     <div 
-      className={[
-        classes.box
-      ].join(' ')}
+      className={cg(styles.box)}
     />
   )
 }
 
 export default function Page() {
-  const arr = Array.from({ length: 100 }, (_, i) => i);
+  const arr = Array.from({ length: 1000 }, (_, i) => i);
   return (
     <>
       <Link href='/'>
@@ -37,14 +37,14 @@ export default function Page() {
   )
 }
 
-const styleCreator = makeStyleCreator(() => ({
+const styleCreator = makeStyleCreator(theme => ({
   box: {
     height: 100,
     width: 100,
     margin: 5,
-    backgroundColor: '#000',
+    backgroundColor: theme.colors.primary,
     ':hover': {
-      backgroundColor: '#f00'
+      backgroundColor: '#00f'
     }
   }
 }))

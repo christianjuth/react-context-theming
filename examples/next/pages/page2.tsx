@@ -1,13 +1,14 @@
 import React from 'react';
-import { makeStyleCreator, useStyleCreatorClassNames } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator, useClassGenerator } from 'react-context-theming/web';
 import Link from 'next/link';
 
 
 export default function Home() {
   const [color, setColor] = React.useState('#f00');
-  const classes = useStyleCreatorClassNames(styleCreator, color);
+  const styles = useStyleCreator(styleCreator, color);
 
-  console.log(color)
+  const cg = useClassGenerator();
+
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -22,7 +23,12 @@ export default function Home() {
           page2
         </a>
       </Link>
-      <div className={classes.box} />
+      <div 
+        className={cg({
+          ...styles.box,
+          // backgroundColor: color
+        })} 
+      />
     </>
   )
 }

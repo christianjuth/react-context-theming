@@ -1,25 +1,27 @@
 import React from 'react';
-import { makeStyleCreator, useStyleCreatorClassNames, useStyleCreator } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator, useClassGenerator } from 'react-context-theming/web';
 import Link from 'next/link';
 
 function Box({
-  className
+  style
 }: {
-  className?: string
+  style?: React.CSSProperties
 }) {
-  const classes = useStyleCreatorClassNames(styleCreator);
+  const styles = useStyleCreator(styleCreator);
+  const cg = useClassGenerator();
   return (
     <div 
-      className={[
-        classes.redBox,
-        className
-      ].join(' ')}
+      className={cg({
+        ...styles.redBox,
+        ...style
+      })}
     />
   )
 }
 
 export default function Page() {
-  const classes = useStyleCreatorClassNames(styleCreator);
+  const styles = useStyleCreator(styleCreator);
+  const cg = useClassGenerator();
   return (
     <>
       <Link href='/page2'>
@@ -28,20 +30,21 @@ export default function Page() {
         </a>
       </Link>
       <div
-        className={[
-          classes.blueBox,
-          classes.greenBox
-        ].join(' ')}
+        className={cg({
+          ...styles.blueBox,
+          ...styles.greenBox
+        })}
       />
       <div
-        className={[
-          classes.blueBox,
-          classes.greenBox
-        ].join(' ')}
+        className={cg({
+          ...styles.blueBox,
+          ...styles.greenBox
+        })}
       />
       <Box
-        className={classes.blueBox}
+        style={styles.blueBox}
       />
+      <input/>
     </>
   )
 }

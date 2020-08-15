@@ -16,27 +16,23 @@ const initialState: StyleReducerState = {
 const reducer = (state: StyleReducerState, action: any) => {
   switch (action.type) {
     case types.REGISTER_STYLE: 
-      // register styles if it doesn't already exsist
-      const styles = { 
-        [action.payload.key]: action.payload.css,
-        ...state.styles 
-      };
-      // update style without affecting priority
-      styles[action.payload.key] = action.payload.css;
       return {
         ...state,
-        styles
+        styles: {
+          ...state.styles,
+          [action.payload.key]: action.payload.css
+        }
       }
-    case types.DEREGISTER_STYLE: 
-      // register styles if it doesn't already exsist
-      const stylesClone = {
-        ...state.styles 
-      };
-      delete stylesClone[action.payload.key]
-      return {
-        ...state,
-        styles: stylesClone
-      }
+    // case types.DEREGISTER_STYLE: 
+    //   // register styles if it doesn't already exsist
+    //   const stylesClone = {
+    //     ...state.styles 
+    //   };
+    //   delete stylesClone[action.payload.key]
+    //   return {
+    //     ...state,
+    //     styles: stylesClone
+    //   }
     default:
       return state;
   }
@@ -45,8 +41,6 @@ const reducer = (state: StyleReducerState, action: any) => {
 const StoreContext = React.createContext<{
   state: StyleReducerState,
   dispatch: React.Dispatch<any>,
-  conponentIdRef?: React.MutableRefObject<number>,
-  serverStyles?: React.MutableRefObject<{ [key: string]: any }>
 }>({
   state: initialState,
   dispatch: () => {}
@@ -58,9 +52,8 @@ export function StoreProvider({
   children: React.ReactNode
 }) {
   const [ state, dispatch ] = React.useReducer(reducer, initialState);
-  const conponentIdRef = React.useRef(0);
   return (
-    <StoreContext.Provider value={{ state, dispatch, conponentIdRef }}>
+    <StoreContext.Provider value={{ state, dispatch }}>
       {children}
     </StoreContext.Provider>
   )
@@ -101,16 +94,4 @@ export const storeActions = {
     }
   })
 
-}
-
-export function useId() {
-  const ref = React.useRef<number | null>(null);
-  const { conponentIdRef } = React.useContext(StoreContext);
-  
-  if (ref.current === null && conponentIdRef) {
-    ref.current = conponentIdRef.current;
-    conponentIdRef.current++;
-  }
-
-  return ref.current + '';
 }

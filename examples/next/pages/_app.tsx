@@ -8,7 +8,15 @@ class App extends NextApp {
   render() {
     const { Component, pageProps } = this.props;
     return (
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider 
+        theme={{
+          ...defaultTheme,
+          colors: {
+            ...defaultTheme.colors,
+            // primary: '#f00'
+          }
+        }}
+      >
         <Component {...pageProps}/>
       </ThemeProvider>
     );

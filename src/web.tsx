@@ -3,12 +3,11 @@ import { useTheme, Context, Theme } from './index';
 import { 
   processCSS, 
   ObjectKeys, 
-  removeClassOnlyStyles, 
   oneTimeWarn, 
   camelCaseStylesToVanillaCSS
 } from './utils';
 import { defaultTheme, IS_BROWSER, IS_SERVER, VERSION, CLASS_PREFIX } from './constants';
-import { useStore, useId, useDispatch, storeActions, StoreProvider } from './web-store';
+import { useStore, useDispatch, storeActions, StoreProvider } from './web-store';
 
 export type NamedStyles<T> = { 
   [P in keyof T]: React.CSSProperties
@@ -38,8 +37,6 @@ export function makeStyleCreator<
   );
 }
 
-
-
 export function useStyleCreator<
   T = Theme, 
   S = never
@@ -47,18 +44,8 @@ export function useStyleCreator<
   styleFn: GenerateStylesFunction<T, S>,
   ...extraData: any[]
 ) {
-  return removeClassOnlyStyles(styleFn(useTheme<T>(), ...extraData));
+  return styleFn(useTheme<T>(), ...extraData);
 };
-
-export function useStyleCreatorClassNames<
-  T = Theme,
-  S = never
->(
-  styleFn: GenerateStylesFunction<T, S>,
-  ...extraData: any[]
-) {
-  return useCSS(styleFn(useTheme<T>(), ...extraData));
-}
 
 export function withStyleCreator<
   T = Theme,
@@ -81,6 +68,72 @@ export function withStyleCreator<
     }
   };
 }
+
+
+
+
+export function useClassGenerator() {
+  const dispatch = useDispatch();
+  const { state } = useStore();
+  const computedStyles = React.useRef<any>({});
+  const serverStyles = React.useContext(ServerStyleSheetContext);
+  const requestUpdate = React.useRef(false);
+
+  // register styles
+  React.useEffect(() => {
+
+    if (!requestUpdate.current) {
+      return;
+    }
+    
+    Object.keys(computedStyles.current).map(className => {
+
+      const css = computedStyles.current[className];
+      dispatch(storeActions.registerStyle({
+        css,
+        key: className+''
+      }));
+
+    });
+
+    requestUpdate.current = false;
+
+  });
+
+  return (styles: Record<string, any>) => {
+    const styleSheet = camelCaseStylesToVanillaCSS(styles);
+    let requestSSR = false;
+
+    // Runtime Styles
+    ObjectKeys(styleSheet).map(className => {
+  
+      const oldCSS = state.styles[className];
+      const css = processCSS(styleSheet[className]);
+
+      // Enable SSR only on first render
+      if (IS_SERVER && oldCSS === undefined) {
+        requestSSR = true;
+      }
+  
+      if (oldCSS !== css) {
+        computedStyles.current[className] = css;
+        requestUpdate.current = true;
+      }
+    });
+
+    // SSR Styles
+    if (requestSSR && serverStyles) {
+      serverStyles.current = {
+        ...serverStyles.current,
+        ...computedStyles.current
+      }
+    }
+
+    return Object.keys(styleSheet).join(' ');
+  };
+}
+
+
 
 export function Provider<T = Theme>({ 
   theme = defaultTheme as any,
@@ -124,101 +177,6 @@ export function StyleSheet() {
     </style>
   );
 }
-
-
-export function useCSS<A>(styles: A): {
-  [P in keyof A]: string;
-} {
-  const id = useId();
-  const dispatch = useDispatch();
-  const { state } = useStore();
-  const updateKey = React.useRef(0); 
-  let requestSSR = false;
-
-  const styleSheet = camelCaseStylesToVanillaCSS(styles, id);
-
-  // attempt to access ServerStyleSheet
-  const serverStyles = React.useContext(ServerStyleSheetContext);
-
-  const computedStyles: ComputedStyles = {};
-
-  const classNames: any = {};
-  ObjectKeys(styleSheet).map(key => {
-
-    const className = `${CLASS_PREFIX}${id}-${key+''}`;
-    classNames[key] = className;
-
-    const oldCSS = state.styles[className] ?? serverStyles.current[className];
-    const css = processCSS(styleSheet[key]);
-
-    // Enable SSR only on first render
-    if (IS_SERVER && oldCSS === undefined) {
-      requestSSR = true;
-    }
-
-    if (oldCSS !== css) {
-      updateKey.current++;
-      computedStyles[className] = css;
-    }
-  });
-
-
-  // SSR - Append styles to ServerStyleSheet
-  if (requestSSR && serverStyles) {
-    let componentStyles: any = {};
-
-    Object.keys(computedStyles).map(key => {
-      const css = computedStyles[key];
-
-      componentStyles = {
-        [key]: css,
-        ...componentStyles
-      }
-    });
-
-    serverStyles.current = {
-      ...serverStyles.current,
-      ...componentStyles
-    }
-  }
-
-  // register styles
-  React.useEffect(() => {
-    
-    Object.keys(computedStyles).map(className => {
-
-      const css = computedStyles[className];
-      dispatch(storeActions.registerStyle({
-        css,
-        key: className+''
-      }));
-
-    });
-  }, [updateKey.current]);
-
-  // deregister styles on unmount
-  React.useEffect(() => {
-    return () => {
-
-      setTimeout(() => {
-
-        ObjectKeys(styleSheet).map(key => {
-          const className = `${CLASS_PREFIX}${id}-${key+''}`;
-
-          dispatch(storeActions.deregisterStyle({
-            key: className+''
-          }));
-        });
-      }, 1000);
-
-    };
-  }, [id]);
-
-  return classNames;
-}
-
-
-
 
 
 const ServerStyleSheetContext = React.createContext<{ 
