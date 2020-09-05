@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyleCreator, useStyleCreator, useClassGenerator } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator, useClassNameGenerator } from 'react-context-theming/web';
 import Link from 'next/link';
 
 
@@ -7,7 +7,7 @@ export default function Home() {
   const [color, setColor] = React.useState('#f00');
   const styles = useStyleCreator(styleCreator, color);
 
-  const cg = useClassGenerator();
+  const cg = useClassNameGenerator();
 
 
   React.useEffect(() => {

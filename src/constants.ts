@@ -348,6 +348,28 @@ export const colors: {
   }
 };
 
+export const breakPoints = {
+  xs: 0,
+  sm: 576,
+  md: 768,
+  lg: 992,
+  xl: 1200,
+  xxl: 1600
+} as const;
+
+type BreakPoint = keyof typeof breakPoints;
+
+export function mediaQuery(min?: BreakPoint, max?: BreakPoint) {
+	const bounds: string[] = [];
+	if (min) {
+		bounds.push(`(min-width: ${breakPoints[min]}px)`);
+	}
+	if (max) {
+		bounds.push(`(max-width: ${breakPoints[max]}px)`);
+	}
+	return `@media only screen and ${bounds.join(' and ')}`
+}
+
 /**
  * @ignore
  */
@@ -371,5 +393,6 @@ export const defaultTheme: Theme = {
     thin: ''
   },
   dark: false,
-  roundness: 4
+  roundness: 4,
+  mediaQuery
 }

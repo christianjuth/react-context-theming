@@ -72,7 +72,7 @@ export function withStyleCreator<
 
 
 
-export function useClassGenerator() {
+export function useClassNameGenerator() {
   const dispatch = useDispatch();
   const { state } = useStore();
   const computedStyles = React.useRef<any>({});
@@ -165,7 +165,7 @@ export function Provider<T = Theme>({
 
 export function StyleSheet() {
   const { state } = useStore();
-  const computedStyles = Object.values(state.styles).reverse().join(' ');
+  const computedStyles = Object.values(state.styles).join(' ');
 
   return (
     <style 
@@ -207,7 +207,7 @@ export class ServerStyleSheet {
   getStyleElement() {
     const computedStyles = Object.values({
       ...this.styles.current
-    }).reverse().join(' ');
+    }).join(' ');
   
     return (
       <style 

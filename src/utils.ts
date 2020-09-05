@@ -87,7 +87,7 @@ export function prettyCSS(css: string) {
 }
 
 export function minifyCSS(css: string) {
-  return css.replace(/(\s|\r|\n)+/g, '');
+  return css.replace(/(\s|\r|\n)+/g, ' ');
 }
 
 export function processCSS(css: string) {

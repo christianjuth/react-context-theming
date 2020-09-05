@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { defaultTheme } from './constants';
+import { defaultTheme, mediaQuery } from './constants';
 export * from './constants';
 
 
@@ -28,7 +28,8 @@ export type Theme = {
     thin: string
   },
   dark?: boolean,
-  roundness?: number
+  roundness?: number,
+  mediaQuery: typeof mediaQuery
 };
 
 
