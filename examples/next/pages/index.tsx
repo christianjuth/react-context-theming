@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyleCreator, useStyleCreator, useClassGenerator } from 'react-context-theming/web';
+import { makeStyleCreator, useStyleCreator, useClassNameGenerator } from 'react-context-theming/web';
 import Link from 'next/link';
 
 function Box({
@@ -8,7 +8,7 @@ function Box({
   style?: React.CSSProperties
 }) {
   const styles = useStyleCreator(styleCreator);
-  const cg = useClassGenerator();
+  const cg = useClassNameGenerator();
   return (
     <div 
       className={cg({
@@ -21,7 +21,7 @@ function Box({
 
 export default function Page() {
   const styles = useStyleCreator(styleCreator);
-  const cg = useClassGenerator();
+  const cg = useClassNameGenerator();
   return (
     <>
       <Link href='/page2'>

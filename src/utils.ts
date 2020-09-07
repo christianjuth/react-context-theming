@@ -1,4 +1,5 @@
 import { IS_DEV, CLASS_PREFIX } from './constants';
+import { memo } from 'react';
 
 const warnings: string[] = [];
 export function oneTimeWarn(msg: string) {
@@ -9,33 +10,8 @@ export function oneTimeWarn(msg: string) {
   warnings.push(msg);
 }
 
-
-
-const AD_REPLACER_R = /(a)(d)/gi;
-
-/* This is the "capacity" of our alphabet i.e. 2x26 for all letters plus their capitalised
- * counterparts */
-const charsLength = 52;
-
-/* start at 75 for 'a' until 'z' (25) and then start at 65 for capitalised letters */
-const getAlphabeticChar = (code: number): string =>
-  String.fromCharCode(code + (code > 25 ? 39 : 97));
-
-/* input a number, usually a hash and convert it to base-52 */
-export function generateAlphabeticName(code: number): string {
-  let name = '';
-  let x;
-
-  /* get a char and divide by alphabet-length */
-  for (x = Math.abs(code); x > charsLength; x = (x / charsLength) | 0) {
-    name = getAlphabeticChar(x % charsLength) + name;
-  }
-
-  return (getAlphabeticChar(x % charsLength) + name).replace(AD_REPLACER_R, '$1-$2');
-}
-
-export function generateComponentId (str: string): string {
-  return generateAlphabeticName(hash(str) >>> 0);
+export function generateComponentId(str: string) {
+  return hash(str) >>> 0;
 };
 
 
@@ -55,9 +31,9 @@ export const phash = (h: number, x: string): number => {
 };
 
 // This is a djb2 hashing function
-export const hash = (x: string): number => {
+export const hash = (((x: string): number => {
   return phash(SEED, x);
-};
+}));
 
 
 
@@ -86,12 +62,46 @@ export function prettyCSS(css: string) {
   return fixIndentation(css);
 }
 
-export function minifyCSS(css: string) {
-  return css.replace(/(\s|\r|\n)+/g, ' ');
+export function processCSS(css: string) {
+  return IS_DEV ? prettyCSS(css) : css;
 }
 
-export function processCSS(css: string) {
-  return IS_DEV ? prettyCSS(css) : minifyCSS(css);
+export function memoize(fn: (arg: string) => any) {
+  const cache: Record<string, any> = {};
+
+  return (value: string) => {
+    if (cache[value]) {
+      return cache[value];
+    }
+
+    const output = fn(value);
+    cache[value] = output;
+    return output;
+  }
+}
+
+function getAvg(times: number[]) {
+  const total = times.reduce((acc, c) => acc + c, 0);
+  return total / times.length;
+}
+
+export function timer(fn: any) {
+  const times: number[] = [];
+  return (...args: any) => {
+      let t0 = 0;
+      if(typeof window !== 'undefined') {
+        t0 = performance.now();
+      }
+      const output = fn(...args);
+      let t1 = 0;
+      if(typeof window !== 'undefined') {
+        t1 = performance.now();
+      }
+      const diff = t1 - t0;
+      times.push(diff);
+      console.log(getAvg(times))
+      return output;
+  }
 }
 
 
@@ -103,7 +113,7 @@ export function processCSS(css: string) {
  * 
  * Example: "padding: 10" becomes "padding: 10px"
  */
-export function addUnitToPeropertyIfNeeded(property: string, value: number) {
+const needsUnit = ((property: string) => {
   const match = [
     'width',
     'height',
@@ -115,9 +125,9 @@ export function addUnitToPeropertyIfNeeded(property: string, value: number) {
     'outset',
     'gap'
   ];
-  for(let i = 0; i < match.length; i++) {
-    if(property.toLowerCase().indexOf(match[i]) > -1) {
-      return value + 'px';
+  for(const keyword of match) {
+    if(property.toLowerCase().indexOf(keyword) > -1) {
+      return true;
     }
   }
   const exactMatch = [
@@ -127,10 +137,10 @@ export function addUnitToPeropertyIfNeeded(property: string, value: number) {
     'left'
   ];
   if(exactMatch.indexOf(property) > -1) {
-    return value + 'px';
+    return true;
   }
-  return value + '';
-}
+  return false;
+});
 
 function processSelectorStyles<A, B>(selector: A, styles: B): {
   [key: string]: {
@@ -144,10 +154,10 @@ function processSelectorStyles<A, B>(selector: A, styles: B): {
     value: string
   }[] = [];
 
-  ObjectKeys(styles).forEach(prop => {
+  for (const prop of ObjectKeys(styles)) {
     if ((prop+'').indexOf(':') === 0 || (prop+'').indexOf('@') === 0) {
       Object.assign(output, processSelectorStyles(`${selector}${prop}`, styles[prop]));
-      return;
+      continue;
     }
 
     const val = styles[prop];
@@ -155,9 +165,9 @@ function processSelectorStyles<A, B>(selector: A, styles: B): {
     selectorStyles.push({
       prop: prop+'',
       // number values should default to px unit
-      value: typeof val === 'number' ? addUnitToPeropertyIfNeeded(prop+'', val) : val+''
+      value: (typeof val === 'number' && needsUnit(prop+'')) ? val+'px' : val+''
     })
-  });
+  }
 
   return {
     [selector+'']: selectorStyles,
@@ -177,34 +187,47 @@ export function camelCaseStylesToVanillaCSS<A extends { [key: string]: any }>(st
 
   const selectorStyles = processSelectorStyles('', styles);
 
-  ObjectKeys(selectorStyles).forEach(selector => {
+  for (const selector of ObjectKeys(selectorStyles)) {
     const css = selectorStyles[selector].map(style => `${camelCaseToHyphenated(style.prop)}:${style.value}`).join('; ');
     const className = `${CLASS_PREFIX}-${generateComponentId(selector+css)}`;
 
     const query = (selector+'').match(/@.*/)?.[0];
     const pseudo = (selector+'').match(/:.*/)?.[0] ?? '';
 
-
-    // handle media queries
-    if(query) {
-      output[className] = `
-        ${query} {
-          .${className} { 
+    if (IS_DEV) {
+      // handle media queries
+      if(query) {
+        output[className] = `
+          ${query} {
+            .${className} { 
+              ${css}
+            }
+          }
+        `;
+      } 
+      
+      // default case can handle pseudo selectors
+      else {
+        output[className] = `
+          .${className}${pseudo} { 
             ${css}
           }
-        }
-      `;
-    } 
-    
-    // default case can handle pseudo selectors
-    else {
-      output[className] = `
-        .${className}${pseudo} { 
-          ${css}
-        }
-      `;
+        `;
+      }
     }
-  });
+
+    else {
+      // handle media queries
+      if(query) {
+        output[className] = `${query} { .${className} { ${css} } }`;
+      } 
+      
+      // default case can handle pseudo selectors
+      else {
+        output[className] = `.${className}${pseudo} { ${css} } `;
+      }
+    }
+  }
 
   return output;
 }
